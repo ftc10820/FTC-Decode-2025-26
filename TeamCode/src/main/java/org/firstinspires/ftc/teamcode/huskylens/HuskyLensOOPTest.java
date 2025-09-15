@@ -46,7 +46,7 @@ public class HuskyLensOOPTest extends LinearOpMode {
     @Override
     public void runOpMode()
     {
-        HuskyLensCam camera = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),1.25,1100);
+        HuskyLensCam camera = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),348,1100);
 
 
         /*

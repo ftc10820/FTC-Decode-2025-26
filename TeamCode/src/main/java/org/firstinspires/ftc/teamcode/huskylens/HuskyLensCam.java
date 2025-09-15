@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.huskylens;
 import static android.os.SystemClock.sleep;
 
 
+import static java.lang.Math.tan;
+
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 
 import org.threeten.bp.LocalTime;
@@ -19,6 +21,7 @@ public class HuskyLensCam {
     private static final double VERTICAL_FOV = 65.5;   // degrees
     private static final int CAMERA_CENTER_X = 160;   // pixels
     private static final int CAMERA_CENTER_Y = 120;   // pixels
+    private static final double VERTICAL_FOCAL_LENGTH = CAMERA_CENTER_Y / tan(Math.toRadians(VERTICAL_FOV / 2.0)); // pixels
 
     private int getSpecimenScreenYLimit() {
         return specimenScreenYLimit;
@@ -73,7 +76,7 @@ public class HuskyLensCam {
         idToColor.put(3,"Red");
         //TODO: add real width of elements
         widthOfGameElements.put("specimen",4.25);
-        widthOfGameElements.put("apriltag",5.21);
+        widthOfGameElements.put("apriltag",17.0);
 
     }
     public List<ObjectInfo> scanColor() {
@@ -106,8 +109,9 @@ public class HuskyLensCam {
 
 
                 double correctedDistance = (realWidth * focalPoint) / correctedPixelWidth;
+                double realHeight = Math.abs(correctedDistance*Math.tan(Math.toRadians(pitchAngleDegrees)));
 
-                objects.add(new ObjectInfo(colorBlock.x, colorBlock.y, "color", idToColor.get(colorBlock.id), correctedDistance, yawAngleDegrees, pitchAngleDegrees, time));
+                objects.add(new ObjectInfo(colorBlock.x, colorBlock.y,  "color", idToColor.get(colorBlock.id), correctedDistance, yawAngleDegrees, pitchAngleDegrees, realHeight, time));
             }
         }
         return objects;
@@ -140,8 +144,9 @@ public class HuskyLensCam {
 
             // Calculate corrected distance
             double correctedDistance = (realWidth * focalPoint) / correctedPixelWidth;
+            double realHeight = Math.abs(correctedDistance*Math.tan(Math.toRadians(pitchAngleDegrees)));
 
-            objects.add(new ObjectInfo(apriltagBlock.x, apriltagBlock.y, "apriltag", "apriltag id #" + apriltagBlock.id, correctedDistance, yawAngleDegrees, pitchAngleDegrees, time));
+            objects.add(new ObjectInfo(apriltagBlock.x, apriltagBlock.y, "apriltag", "apriltag id #" + apriltagBlock.id, correctedDistance, yawAngleDegrees, pitchAngleDegrees, realHeight, time));
         }
         return objects;
     }
