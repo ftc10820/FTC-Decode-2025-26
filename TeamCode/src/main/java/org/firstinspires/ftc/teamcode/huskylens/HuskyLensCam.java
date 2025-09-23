@@ -101,7 +101,7 @@ public class HuskyLensCam {
 
 
                 double pixelOffsetY = colorBlock.y - CAMERA_CENTER_Y;
-                double pitchAngleDegrees = (pixelOffsetY / CAMERA_CENTER_Y) * (VERTICAL_FOV / 2.0);
+                double pitchAngleDegrees = Math.toDegrees(Math.atan2(pixelOffsetY, VERTICAL_FOCAL_LENGTH));
 
 
                 double yawAngleRadians = Math.toRadians(yawAngleDegrees);
@@ -136,7 +136,7 @@ public class HuskyLensCam {
 
             // Calculate pitch (vertical angle)
             double pixelOffsetY = apriltagBlock.y - CAMERA_CENTER_Y;
-            double pitchAngleDegrees = (pixelOffsetY / CAMERA_CENTER_Y) * (VERTICAL_FOV / 2.0);
+            double pitchAngleDegrees = Math.toDegrees(Math.atan2(pixelOffsetY, VERTICAL_FOCAL_LENGTH));
 
             // Compensate for yaw angle in distance calculation
             double yawAngleRadians = Math.toRadians(yawAngleDegrees);
