@@ -1,164 +1,263 @@
-//package org.firstinspires.ftc.teamcode.huskylens;
-//import static android.os.SystemClock.sleep;
-//
-//
-//import static java.lang.Math.tan;
-//
-//import com.qualcomm.hardware.dfrobot.HuskyLens;
-//
-//import org.firstinspires.ftc.teamcode.robot.ObjectInfo;
-//import org.threeten.bp.LocalTime;
-//
-//import java.util.ArrayList;
-//import java.util.Collections;
-//import java.util.List;
-//import java.util.concurrent.ConcurrentHashMap;
-//
-//public class HuskyLensCam {
-//    //TODO: Add exception handling framework
-//
-//
-//    private static final double HORIZONTAL_FOV = 78.5; // degrees
-//    private static final double VERTICAL_FOV = 65.5;   // degrees
-//    private static final int CAMERA_CENTER_X = 160;   // pixels
-//    private static final int CAMERA_CENTER_Y = 120;   // pixels
-//    private static final double VERTICAL_FOCAL_LENGTH = CAMERA_CENTER_Y / tan(Math.toRadians(VERTICAL_FOV / 2.0)); // pixels
-//
-//    private int getSpecimenScreenYLimit() {
-//        return specimenScreenYLimit;
-//    }
-//
-//    private void setSpecimenScreenYLimit(int specimenScreenYLimit) {
-//        this.specimenScreenYLimit = specimenScreenYLimit;
-//    }
-//
-//    private volatile int specimenScreenYLimit;
-//    private ConcurrentHashMap<String, Double> getWidthOfGameElements() {
-//        return widthOfGameElements;
-//    }
-//
-//
-//
-//    private ConcurrentHashMap<String,Double> widthOfGameElements = new ConcurrentHashMap<>();
-//    private double getFocalPoint() {
-//        return focalPoint;
-//    }
-//
-//    private ConcurrentHashMap<Integer, String> getIdToColor() {
-//        return idToColor;
-//    }
-//
-//
-//
-//    private ConcurrentHashMap<Integer,String> idToColor = new ConcurrentHashMap<>();
-//    private void setFocalPoint(double focalPoint) {
-//        this.focalPoint = focalPoint;
-//    }
-//
-//    private volatile double focalPoint;
-//    private HuskyLens getCamera() {
-//        return camera;
-//    }
-//
-//    private void setCamera(HuskyLens camera) {
-//        this.camera = camera;
-//    }
-//
-//    private HuskyLens camera = null;
-//    public HuskyLensCam(HuskyLens camera, double focalPoint, int specimenScreenYLimit){
-//        setCamera(camera);
-//        if (getCamera() == null){
-//            throw new NullPointerException("INIT: Camera is null");
-//        }
-//        setFocalPoint(focalPoint);
-//        setSpecimenScreenYLimit(specimenScreenYLimit);
-//        idToColor.put(1,"Yellow");
-//        idToColor.put(2,"Blue");
-//        idToColor.put(3,"Red");
-//        //TODO: add real width of elements
-//        widthOfGameElements.put("specimen",4.25);
-//        widthOfGameElements.put("apriltag",17.0);
-//
-//    }
-//    public List<ObjectInfo> scanColor() {
-//        HuskyLens camera = getCamera();
-//        List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
-//        double focalPoint = getFocalPoint();
-//        //detecting specimen
-//
-//        camera.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION);
-//        sleep(100);
-//        HuskyLens.Block[] colorBlocks = camera.blocks();
-//        int specimenScreenYLimit = getSpecimenScreenYLimit();
-//
-//        for (HuskyLens.Block colorBlock : colorBlocks) {
-//            if (colorBlock.y <= specimenScreenYLimit) {
-//                double realWidth = widthOfGameElements.get("specimen");
-//                LocalTime time = LocalTime.now();
-//
-//
-//                double pixelOffsetX = colorBlock.x - CAMERA_CENTER_X;
-//                double yawAngleDegrees = (pixelOffsetX / CAMERA_CENTER_X) * (HORIZONTAL_FOV / 2.0);
-//
-//
-//                double pixelOffsetY = colorBlock.y - CAMERA_CENTER_Y;
-//                double pitchAngleDegrees = Math.toDegrees(Math.atan2(pixelOffsetY, VERTICAL_FOCAL_LENGTH));
-//
-//
-//                double yawAngleRadians = Math.toRadians(yawAngleDegrees);
-//                double correctedPixelWidth = colorBlock.width / Math.cos(yawAngleRadians);
-//
-//
-//                double correctedDistance = (realWidth * focalPoint) / correctedPixelWidth;
-//                double realHeight = Math.abs(correctedDistance*Math.tan(Math.toRadians(pitchAngleDegrees)));
-//
-//                objects.add(new ObjectInfo(colorBlock.x, colorBlock.y,  "color", idToColor.get(colorBlock.id), correctedDistance, yawAngleDegrees, pitchAngleDegrees, realHeight, time));
-//            }
-//        }
-//        return objects;
-//    }
-//
-//    public List <ObjectInfo> scanTag(){
-//        List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
-//        HuskyLens camera = getCamera(); // Added to get camera instance
-//        double focalPoint = getFocalPoint(); // Added to get focal point
-//        camera.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
-//        sleep(200);
-//        HuskyLens.Block[] apriltagBlocks = camera.blocks();
-//
-//
-//        for (HuskyLens.Block apriltagBlock : apriltagBlocks) {
-//            double realWidth = widthOfGameElements.get("apriltag");
-//            LocalTime time = LocalTime.now();
-//
-//            // Calculate yaw (horizontal angle)
-//            double pixelOffsetX = apriltagBlock.x - CAMERA_CENTER_X;
-//            double yawAngleDegrees = (pixelOffsetX / CAMERA_CENTER_X) * (HORIZONTAL_FOV / 2.0);
-//
-//            // Calculate pitch (vertical angle)
-//            double pixelOffsetY = apriltagBlock.y - CAMERA_CENTER_Y;
-//            double pitchAngleDegrees = Math.toDegrees(Math.atan2(pixelOffsetY, VERTICAL_FOCAL_LENGTH));
-//
-//            // Compensate for yaw angle in distance calculation
-//            double yawAngleRadians = Math.toRadians(yawAngleDegrees);
-//            double correctedPixelWidth = apriltagBlock.width / Math.cos(yawAngleRadians);
-//
-//            // Calculate corrected distance
-//            double correctedDistance = (realWidth * focalPoint) / correctedPixelWidth;
-//            double realHeight = Math.abs(correctedDistance*Math.tan(Math.toRadians(pitchAngleDegrees)));
-//
-//            objects.add(new ObjectInfo(apriltagBlock.x, apriltagBlock.y, "apriltag", "apriltag id #" + apriltagBlock.id, correctedDistance, yawAngleDegrees, pitchAngleDegrees, realHeight, time));
-//        }
-//        return objects;
-//    }
-//
-//    public List<ObjectInfo> scanAll() {
-//        //TODO: Improve logic
-//        // add exception handling
-//        List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
-//        objects.addAll(scanColor());
-//        sleep(1000);
-//        objects.addAll(scanTag());
-//        return objects;
-//    }
-//}
+package org.firstinspires.ftc.teamcode.huskylens;
+
+import static android.os.SystemClock.sleep;
+import static java.lang.Math.tan;
+
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Rotation2d;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.threeten.bp.LocalTime;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class HuskyLensCam {
+
+    // === Camera intrinsic parameters ===
+    private static final double HORIZONTAL_FOV = 78.5; // degrees
+    private static final double VERTICAL_FOV = 65.5;   // degrees
+    private static final int CAMERA_CENTER_X = 160;    // pixels
+    private static final int CAMERA_CENTER_Y = 120;    // pixels
+    private static final double VERTICAL_FOCAL_LENGTH =
+            CAMERA_CENTER_Y / tan(Math.toRadians(VERTICAL_FOV / 2.0)); // pixels
+
+    // === Instance fields ===
+    private volatile int specimenScreenYLimit;
+    private volatile double focalPoint;
+    private HuskyLens camera;
+
+    // Camera mounting parameters
+    private volatile double cameraHeightCm; // height from ground (cm)
+    private volatile double cameraTiltDeg;  // downward = negative, upward = positive
+
+    private final ConcurrentHashMap<Integer, String> idToColor = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Double> widthOfGameElements = new ConcurrentHashMap<>();
+
+    // === Constructor ===
+    /**
+     * @param camera HuskyLens instance
+     * @param focalPoint initial focal length (px)
+     * @param specimenScreenYLimit y limit for color detection
+     * @param cameraHeightCm camera height from ground (cm)
+     * @param cameraTiltDeg camera tilt (degrees, downward negative)
+     */
+    public HuskyLensCam(HuskyLens camera,
+                        double focalPoint,
+                        int specimenScreenYLimit,
+                        double cameraHeightCm,
+                        double cameraTiltDeg) {
+        if (camera == null) {
+            throw new NullPointerException("INIT: Camera is null");
+        }
+        this.camera = camera;
+        this.focalPoint = focalPoint;
+        this.specimenScreenYLimit = specimenScreenYLimit;
+        this.cameraHeightCm = cameraHeightCm;
+        this.cameraTiltDeg = cameraTiltDeg;
+
+        // Define color IDs
+        idToColor.put(1, "Yellow");
+        idToColor.put(2, "Blue");
+        idToColor.put(3, "Red");
+
+        // Real-world object widths (cm)
+        widthOfGameElements.put("specimen", 4.25);
+        widthOfGameElements.put("apriltag", 16.51);
+    }
+
+    // === Getters ===
+    public double getFocalPoint() { return focalPoint; }
+    public int getSpecimenScreenYLimit() { return specimenScreenYLimit; }
+    public double getCameraHeightCm() { return cameraHeightCm; }
+    public double getCameraTiltDeg() { return cameraTiltDeg; }
+    public HuskyLens getCamera() { return camera; }
+
+    private void setFocalPoint(double focalPoint) { this.focalPoint = focalPoint; }
+
+    // === Core Computation Helper ===
+    private ObjectInfo processBlock(HuskyLens.Block block, double realWidth, String type, String label) {
+        LocalTime time = LocalTime.now();
+
+        // Pixel offsets
+        double xOffset = block.x - CAMERA_CENTER_X;
+        double yOffset = block.y - CAMERA_CENTER_Y; // yOffset is used later for pitch
+
+        // Horizontal angle (yaw)
+        double yawAngleDeg = (xOffset / CAMERA_CENTER_X) * (HORIZONTAL_FOV / 2.0);
+
+        // ... (rawPitchDeg, pitchAngleDeg calculations omitted for brevity, assumed unchanged)
+        // Raw pitch angle (positive = up, negative = down)
+        double rawPitchDeg = -(yOffset / CAMERA_CENTER_Y) * (VERTICAL_FOV / 2.0);
+        // Adjust with camera tilt
+        double pitchAngleDeg = rawPitchDeg + cameraTiltDeg;
+
+        // Corrected pixel width
+        double yawRad = Math.toRadians(yawAngleDeg);
+        double correctedPixelWidth = block.width / Math.cos(yawRad);
+
+        // Compute horizontal distance (straight line distance to object)
+        double distance = (realWidth * focalPoint) / correctedPixelWidth;
+
+        // --- NEW CALCULATION ---
+        // Compute the lateral distance (left/right offset from the center of the robot)
+        // This is calculated using the distance and the yaw angle
+        double lateralDistance = Math.sin(yawRad) * distance;
+        // -----------------------
+
+        // Compute vertical offset relative to camera
+        double totalPitchRad = Math.toRadians(pitchAngleDeg);
+        double verticalOffset = Math.tan(totalPitchRad) * distance;
+
+        // Estimate object height from ground
+        double objectHeight = cameraHeightCm + verticalOffset;
+
+        return new ObjectInfo(
+                block.x, block.y,
+                type, label,
+                distance,
+                lateralDistance, // <--- Pass the new value here
+                yawAngleDeg,
+                pitchAngleDeg,
+                objectHeight,
+                time
+        );
+    }
+
+
+
+    // === Color Recognition ===
+    public List<ObjectInfo> scanColor() {
+        List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
+        HuskyLens camera = getCamera();
+
+        camera.selectAlgorithm(HuskyLens.Algorithm.COLOR_RECOGNITION);
+        sleep(100);
+
+        HuskyLens.Block[] colorBlocks = camera.blocks();
+        if (colorBlocks == null || colorBlocks.length == 0) return objects;
+
+        for (HuskyLens.Block block : colorBlocks) {
+
+            if (block.y <= getSpecimenScreenYLimit()) {
+                double realWidth = widthOfGameElements.get("specimen");
+                String colorName = idToColor.getOrDefault(block.id, "Unknown");
+                objects.add(processBlock(block, realWidth, "color", colorName));
+            }
+        }
+        return objects;
+    }
+
+    // === AprilTag Recognition ===
+    public List<ObjectInfo> scanTag() {
+        List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
+        HuskyLens camera = getCamera();
+
+        camera.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
+        sleep(200);
+
+        HuskyLens.Block[] apriltagBlocks = camera.blocks();
+        if (apriltagBlocks == null || apriltagBlocks.length == 0) return objects;
+
+        for (HuskyLens.Block block : apriltagBlocks) {
+            double realWidth = widthOfGameElements.get("apriltag");
+            objects.add(processBlock(block, realWidth, "apriltag", "apriltag id #" + block.id));
+        }
+        return objects;
+    }
+
+    // === Combined Scan ===
+    public List<ObjectInfo> scanAll() {
+        List<ObjectInfo> allObjects = Collections.synchronizedList(new ArrayList<>());
+        allObjects.addAll(scanColor());
+        sleep(1000);
+        allObjects.addAll(scanTag());
+        return allObjects;
+    }
+    public Pose2d getPose(Pose2d currentPose, ObjectInfo object){
+        //TODO: test and verify that the pose functionality is working as expected
+        return new Pose2d(currentPose.position.x+object.distance,currentPose.position.y+object.lateralDistance,currentPose.heading.log()+Math.toRadians(object.yaw));
+
+    }
+    // === Auto Tuning (Downward Tilt Negative) ===
+    public double autoTuneFocalLength(LinearOpMode opMode,
+                                      double knownDistanceCm,
+                                      double knownHeightCm,
+                                      String objectType,
+                                      int averageCount) {
+
+        HuskyLens camera = getCamera();
+        double realWidth = widthOfGameElements.getOrDefault(objectType, 0.0);
+
+        if (realWidth == 0.0) {
+            opMode.telemetry.addLine("❌ Unknown object type for tuning!");
+            opMode.telemetry.update();
+            return getFocalPoint();
+        }
+
+        opMode.telemetry.addLine("Auto-tuning focal length (downward = negative)...");
+        opMode.telemetry.addData("Camera tilt (deg)", cameraTiltDeg);
+        opMode.telemetry.addData("Camera height (cm)", cameraHeightCm);
+        opMode.telemetry.addData("Target height (cm)", knownHeightCm);
+        opMode.telemetry.addData("Horizontal distance (cm)", knownDistanceCm);
+        opMode.telemetry.update();
+
+        camera.selectAlgorithm(
+                objectType.equals("apriltag") ?
+                        HuskyLens.Algorithm.TAG_RECOGNITION :
+                        HuskyLens.Algorithm.COLOR_RECOGNITION
+        );
+
+        sleep(500);
+        List<Double> focalSamples = new ArrayList<>();
+
+        while (opMode.opModeIsActive() && focalSamples.size() < averageCount) {
+            HuskyLens.Block[] blocks = camera.blocks();
+            if (blocks != null && blocks.length > 0) {
+                HuskyLens.Block block = blocks[0];
+                double pixelWidth = block.width;
+
+                if (pixelWidth > 0) {
+                    double verticalDiff = knownHeightCm - cameraHeightCm;
+                    double slantDistance = Math.sqrt(
+                            knownDistanceCm * knownDistanceCm +
+                                    verticalDiff * verticalDiff
+                    );
+
+                    double f = (pixelWidth * slantDistance) / realWidth;
+                    focalSamples.add(f);
+
+                    opMode.telemetry.addData("Sample", focalSamples.size());
+                    opMode.telemetry.addData("Pixel width", "%.2f", pixelWidth);
+                    opMode.telemetry.addData("Instant focal", "%.2f", f);
+                    opMode.telemetry.update();
+                }
+            } else {
+                opMode.telemetry.addLine("No target detected...");
+                opMode.telemetry.update();
+            }
+            sleep(100);
+        }
+
+        if (focalSamples.isEmpty()) {
+            opMode.telemetry.addLine("❌ Calibration failed: no samples.");
+            opMode.telemetry.update();
+            return getFocalPoint();
+        }
+
+        double sum = 0.0;
+        for (double f : focalSamples) sum += f;
+        double avgFocal = sum / focalSamples.size();
+
+        setFocalPoint(avgFocal);
+
+        opMode.telemetry.addLine("✅ Tilt + height-aware tuning complete!");
+        opMode.telemetry.addData("New focal length (px)", "%.2f", avgFocal);
+        opMode.telemetry.update();
+
+        return avgFocal;
+    }
+}
