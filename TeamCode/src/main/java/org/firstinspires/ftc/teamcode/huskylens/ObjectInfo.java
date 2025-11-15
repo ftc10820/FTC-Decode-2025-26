@@ -5,7 +5,7 @@ import org.threeten.bp.LocalTime;
 public class ObjectInfo {
     int x;
     int y;
-    String objectName;
+    public String objectName;
     String objectType;
     double distance;
     double yaw;

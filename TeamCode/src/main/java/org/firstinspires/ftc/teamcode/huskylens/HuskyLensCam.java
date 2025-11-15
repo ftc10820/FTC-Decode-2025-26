@@ -4,7 +4,6 @@ import static android.os.SystemClock.sleep;
 import static java.lang.Math.tan;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HuskyLensCam {
+    private static final double CM_TO_IN = 0.393701;
 
     // === Camera intrinsic parameters ===
     private static final double HORIZONTAL_FOV = 78.5; // degrees
@@ -177,9 +177,9 @@ public class HuskyLensCam {
         allObjects.addAll(scanTag());
         return allObjects;
     }
-    public Pose2d getPose(Pose2d currentPose, ObjectInfo object){
+    public Pose2d getPoseOf(Pose2d currentPose, ObjectInfo object){
         //TODO: test and verify that the pose functionality is working as expected
-        return new Pose2d(currentPose.position.x+object.distance,currentPose.position.y+object.lateralDistance,currentPose.heading.log()+Math.toRadians(object.yaw));
+        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),(object.lateralDistance*CM_TO_IN)-currentPose.position.y,currentPose.heading.log()+Math.toRadians(object.yaw));
 
     }
     // === Auto Tuning (Downward Tilt Negative) ===
