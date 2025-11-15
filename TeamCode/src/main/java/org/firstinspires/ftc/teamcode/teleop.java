@@ -69,6 +69,8 @@ public class teleop extends LinearOpMode {
 
     public CRServo intake = null;
 
+    public Servo transfer = null;
+
     // drive train motors
     public DcMotor frontLeft;
     public DcMotor frontRight;
@@ -102,6 +104,8 @@ public class teleop extends LinearOpMode {
         eTeleOp.reset();
         double intakePower =0;
         double flywheelPower = 0;
+        double transferPosition = 0;
+        transfer.setPosition(transferPosition);
         while (opModeIsActive()) {
 
 
@@ -122,6 +126,15 @@ public class teleop extends LinearOpMode {
             if (gamepad2.y){
                 flywheelPower = 1;
             }
+            if (gamepad2.right_bumper){
+                if (transferPosition == 0) {
+                    transferPosition = 1;
+                } else {
+                    transferPosition = 0;
+                        }
+                }
+            }
+            transfer.setPosition(transferPosition);
             flywheel.setPower(flywheelPower);
             intake.setPower(intakePower);
             frontLeft.setPower(speedFactor*(frontLeftPower));
@@ -135,5 +148,4 @@ public class teleop extends LinearOpMode {
     }
 
 
-}
 
