@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -10,27 +11,68 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
-import java.util.List;
 
+/** @noinspection unused*/
 @Config
 @Autonomous(name = "Move to AprilTag (test)", group = "Autonomous")
 public class RedGoalAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        // instantiate MecanumDrive at a particular pose.
+
+        /*
+        instantiate MecanumDrive at a particular pose.
+        TODO: finalize initial pose with strategy team
+        */
         Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-        //initialize huskylens
-        HuskyLensCam cam = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 310.47, 200, 29.21, 19.5);
-        waitForStart();
-        List<ObjectInfo> objects=cam.scanTag();
-        while (objects.isEmpty()) objects = cam.scanTag();
 
-        String tagName = objects.get(0).objectName;
+        // initialize HuskyLens
+        HuskyLensCam cam = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 310.47, 200, 29.21, 19.5);
+
+        // initialize actions
+        AutomationsActions automations = new AutomationsActions();
+        AutomationsActions.Shooter shooter = automations.new Shooter(hardwareMap);
+        AutomationsActions.Transfer transfer = automations.new Transfer(hardwareMap);
+        AutomationsActions.HuskyLensDriveControl camControl = automations.new HuskyLensDriveControl(cam, drive, "red");
+
+
+        // waits for start button to be pressed
+        waitForStart();
+
+        // run the actions
+        Actions.runBlocking(
+
+                // sequence of actions
+                new SequentialAction(
+
+                        // spins up shooter
+                        shooter.spinUp(),
+
+                        // drives to large launch zone
+                        //TODO: finalize shooting area
+                        drive.actionBuilder(initialPose)
+                                        .strafeToLinearHeading(new Vector2d(10, 0), Math.toRadians(90))
+                                        .turnTo(Math.toRadians(180))
+                                        .build(),
+
+                        // automatically align robot to goal (might be replaced by odometry assisted aiming for small launch zone)
+                        camControl.autoAlignGoal()//,
+
+                        // transfers ball over to shooter (shoots ball)
+                        //transfer.doTransfer()
+                )
+        );
+
+/*
+              Code from the Paleolithic Era (old code kept here for reference)
+
+                    List<ObjectInfo> objects=cam.scanTag();
+                    while (objects.isEmpty()) objects = cam.scanTag();
+
+                    String tagName = objects.get(0).objectName;
+*/
 
     }
 }

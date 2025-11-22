@@ -1,21 +1,20 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-
 //
-@TeleOp
-public class teleop extends LinearOpMode {
+@TeleOp(name = "TeleOP with automations")
+public class TeleopActions extends LinearOpMode {
     public void initialize() {
 
         // setting up drive train
@@ -25,7 +24,12 @@ public class teleop extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
         flywheel = hardwareMap.get(DcMotor.class,"flywheel");
         intake = hardwareMap.get(CRServo.class, "intake");
-        transfer = hardwareMap.get(Servo.class,"transfer");
+
+
+        automations = new AutomationsActions();
+        transfer = automations.new Transfer(hardwareMap);
+        shooter = automations.new Shooter(hardwareMap);
+
 
 
 
@@ -70,7 +74,7 @@ public class teleop extends LinearOpMode {
 
     public CRServo intake = null;
 
-    public Servo transfer = null;
+    //public Servo transfer = null;
 
     // drive train motors
     public DcMotor frontLeft;
@@ -79,7 +83,9 @@ public class teleop extends LinearOpMode {
     public DcMotor flywheel;
     public DcMotor backRight;
 
-
+    public AutomationsActions automations;
+    public AutomationsActions.Shooter shooter;
+    public AutomationsActions.Transfer transfer;
 
     // there are specific ways that the drive power is calculated based on automations
     double frontLeftPower = 0.0, backLeftPower = 0.0, frontRightPower = 0.0, backRightPower = 0.0;
@@ -106,7 +112,8 @@ public class teleop extends LinearOpMode {
         double intakePower =0;
         double flywheelPower = 0;
         double transferPosition = 0;
-        transfer.setPosition(transferPosition);
+
+        //transfer.setPosition(transferPosition);
         while (opModeIsActive()) {
 
 
@@ -128,20 +135,10 @@ public class teleop extends LinearOpMode {
                 flywheelPower = 1;
             }
             if (gamepad2.right_bumper){
-
-                if (transferPosition != 0) {
-                    telemetry.addData("debug","position 0");
-                    telemetry.update();
-                    transferPosition = 0;
-                } else {
-                    telemetry.addData("debug","position 1");
-                    telemetry.update();
-                    transferPosition = 1;
-                        }
-                sleep(500);
+                Actions.runBlocking(transfer.doTransfer());
                 }
 
-            transfer.setPosition(transferPosition);
+            //transfer.setPosition(transferPosition);
             flywheel.setPower(flywheelPower);
             intake.setPower(intakePower);
             frontLeft.setPower(speedFactor*(frontLeftPower));
