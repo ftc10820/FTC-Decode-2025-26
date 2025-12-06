@@ -23,13 +23,13 @@ public class teleop extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
         backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-        flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+      //  flywheel = hardwareMap.get(DcMotor.class,"flywheel");
         intake = hardwareMap.get(CRServo.class, "intake");
         transfer = hardwareMap.get(Servo.class,"transfer");
 
 
 
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+     //   flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -142,7 +142,7 @@ public class teleop extends LinearOpMode {
                 }
 
             transfer.setPosition(transferPosition);
-            flywheel.setPower(flywheelPower);
+            //flywheel.setPower(flywheelPower);
             intake.setPower(intakePower);
             frontLeft.setPower(speedFactor*(frontLeftPower));
             frontRight.setPower(speedFactor*(frontRightPower));

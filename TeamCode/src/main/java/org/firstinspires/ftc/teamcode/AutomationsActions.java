@@ -77,12 +77,12 @@ public class AutomationsActions {
                 public boolean run(@NonNull TelemetryPacket packet) {
                     switch (currentState) {
                         case INITIAL:
-                            servo.setPosition(1);
+                            servo.setPosition(0);
                             currentState = TransferState.POS_1;
                             return true;
 
                         case POS_1:
-                            servo.setPosition(0);
+                            servo.setPosition(1);
                             timer.reset();
                             currentState = TransferState.WAITING;
                             return true;
@@ -95,7 +95,7 @@ public class AutomationsActions {
                             return true;
 
                         case POS_0:
-                            servo.setPosition(1);
+                            servo.setPosition(0);
                             currentState = TransferState.FINISHED;
                             return false;
 
@@ -112,7 +112,7 @@ public class AutomationsActions {
         }
     public class HuskyLensDriveControl {
         private final HuskyLensCam Cam;
-        private ObjectInfo goalTag;
+        private ObjectInfo goalTag = null;
         private final String Alliance;
         private final MecanumDrive Drive;
 
@@ -137,8 +137,9 @@ public class AutomationsActions {
                     if (Objects.equals(Alliance, "red")) {
                         for (ObjectInfo o : Cam.scanTag()) {
                             // TODO: Get real tag id for red
-                            if (Objects.equals(o.objectName, "apriltag id #" + 21)) {
+                            if (Objects.equals(o.objectName, "apriltag id #" + 0)) {
                                 goalTag = o;
+                                packet.put("tag ObjectInfo: ", goalTag.toString());
                                 break;
                             }
                         }
@@ -154,11 +155,14 @@ public class AutomationsActions {
 
 
 
-                    //code goes here
+
                     if (goalTag != null) {
                         Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
+                        packet.put("targetPose: ", targetPose.toString());
+                        packet.put("currentPose: ", Drive.localizer.getPose().toString());
+                        Drive.localizer.update();
                         trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                                .strafeToLinearHeading(new Vector2d(targetPose.position.x+10, targetPose.position.y+10), targetPose.heading)
+                                .strafeToLinearHeading(new Vector2d(Drive.localizer.getPose().position.x-0.1, Drive.localizer.getPose().position.y), targetPose.heading)
                                 .build();
                     }
                     initialized = true;

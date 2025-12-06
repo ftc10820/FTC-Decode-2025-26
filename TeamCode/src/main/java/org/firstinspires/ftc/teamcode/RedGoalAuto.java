@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 
 /** @noinspection unused*/
 @Config
-@Autonomous(name = "Move to AprilTag (test)", group = "Autonomous")
+@Autonomous(name = "red goal auto", group = "Autonomous")
 public class RedGoalAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

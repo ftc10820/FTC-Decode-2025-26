@@ -1,7 +1,9 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -11,10 +13,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+
 
 //
 @TeleOp(name = "TeleOP with automations")
 public class TeleopActions extends LinearOpMode {
+
     public void initialize() {
 
         // setting up drive train
@@ -22,13 +27,16 @@ public class TeleopActions extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
         backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-        flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
         intake = hardwareMap.get(CRServo.class, "intake");
 
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         automations = new AutomationsActions();
         transfer = automations.new Transfer(hardwareMap);
         shooter = automations.new Shooter(hardwareMap);
+        camControl = automations.new HuskyLensDriveControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 247.07, 200, 29.21, 27), new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0))), "red");
+
 
 
 
@@ -43,8 +51,8 @@ public class TeleopActions extends LinearOpMode {
 
     void driveMethod() {
 
-        double y = -gamepad1.left_stick_x;
-        double x = gamepad1.left_stick_y;
+        double x = -gamepad1.left_stick_x;
+        double y = gamepad1.left_stick_y;
         double turn = gamepad1.right_stick_x;
 
         double theta = Math.atan2(y, x);
@@ -77,15 +85,17 @@ public class TeleopActions extends LinearOpMode {
     //public Servo transfer = null;
 
     // drive train motors
-    public DcMotor frontLeft;
-    public DcMotor frontRight;
-    public DcMotor backLeft;
-    public DcMotor flywheel;
-    public DcMotor backRight;
+    public DcMotorEx frontLeft;
+    public DcMotorEx frontRight;
+    public DcMotorEx backLeft;
+    public DcMotorEx flywheel;
+    public DcMotorEx backRight;
 
     public AutomationsActions automations;
     public AutomationsActions.Shooter shooter;
     public AutomationsActions.Transfer transfer;
+    public AutomationsActions.HuskyLensDriveControl camControl;
+
 
     // there are specific ways that the drive power is calculated based on automations
     double frontLeftPower = 0.0, backLeftPower = 0.0, frontRightPower = 0.0, backRightPower = 0.0;
@@ -103,7 +113,7 @@ public class TeleopActions extends LinearOpMode {
 
     public void runOpMode() throws InterruptedException {
         initialize();
-        //pivot encoder homing
+
 
 
 
@@ -115,9 +125,13 @@ public class TeleopActions extends LinearOpMode {
 
         //transfer.setPosition(transferPosition);
         while (opModeIsActive()) {
-
-
+            telemetry.addData("flywheel velocity",flywheel.getCurrentPosition());
+            telemetry.update();
             driveMethod();
+
+            if (gamepad1.a){
+                Actions.runBlocking(camControl.autoAlignGoal());
+            }
 
             if (gamepad2.b && gamepad2.x) {
                 intakePower = 0;
@@ -139,7 +153,7 @@ public class TeleopActions extends LinearOpMode {
                 }
 
             //transfer.setPosition(transferPosition);
-            flywheel.setPower(flywheelPower);
+           flywheel.setPower(flywheelPower);
             intake.setPower(intakePower);
             frontLeft.setPower(speedFactor*(frontLeftPower));
             frontRight.setPower(speedFactor*(frontRightPower));
