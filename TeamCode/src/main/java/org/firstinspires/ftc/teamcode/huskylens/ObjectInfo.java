@@ -5,7 +5,7 @@ import org.threeten.bp.LocalTime;
 public class ObjectInfo {
     int x;
     int y;
-    public String objectName;
+    public int objectID;
     String objectType;
     double distance;
     double yaw;
@@ -14,10 +14,10 @@ public class ObjectInfo {
     double lateralDistance; // Calculated lateral distance
     LocalTime timestamp;
 
-    public ObjectInfo(int x, int y, String objectType, String objectName, double distance,double lateralDistance,double yaw, double pitch, double realHeight, LocalTime timestamp) {
+    public ObjectInfo(int x, int y, String objectType, int objectID, double distance,double lateralDistance,double yaw, double pitch, double realHeight, LocalTime timestamp) {
         this.x = x;
         this.y = y;
-        this.objectName = objectName;
+        this.objectID = objectID;
         this.objectType = objectType;
         this.distance = distance;
         this.lateralDistance = lateralDistance;
@@ -31,6 +31,6 @@ public class ObjectInfo {
     @NonNull
     @Override
     public String toString() {
-        return "ObjectInfo [x=" + x + ", y=" + y + ", objectType=" + objectType + ", objectName=" + objectName + ", distance=" + distance + ", yaw=" + yaw + ", pitch=" + pitch + ", realHeight=" + realHeight + ", timestamp=" +timestamp+ "]";
+        return "ObjectInfo [x=" + x + ", y=" + y + ", objectType=" + objectType + ", objectName=" + objectID + ", distance=" + distance + ", yaw=" + yaw + ", pitch=" + pitch + ", realHeight=" + realHeight + ", timestamp=" +timestamp+ "]";
     }
 }
