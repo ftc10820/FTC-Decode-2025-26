@@ -1,6 +1,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -14,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 //
+@Config
 @TeleOp
 public class teleop extends LinearOpMode {
     public void initialize() {
@@ -23,13 +25,17 @@ public class teleop extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
         backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-      //  flywheel = hardwareMap.get(DcMotor.class,"flywheel");
-        intake = hardwareMap.get(CRServo.class, "intake");
-        transfer = hardwareMap.get(Servo.class,"transfer");
+        flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+        intake1 = hardwareMap.get(CRServo.class, "intake1");
+        transfer1 = hardwareMap.get(Servo.class,"transfer1");
+        intake2 = hardwareMap.get(CRServo.class, "intake2");
+        transfer2 = hardwareMap.get(Servo.class,"transfer2");
+        intake3 = hardwareMap.get(CRServo.class, "intake3");
+        transfer3 = hardwareMap.get(Servo.class,"transfer3");
 
 
 
-     //   flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -68,9 +74,17 @@ public class teleop extends LinearOpMode {
     }
 
 
-    public CRServo intake = null;
+    public CRServo intake1 = null;
 
-    public Servo transfer = null;
+    public Servo transfer1 = null;
+
+    public CRServo intake2 = null;
+
+    public Servo transfer2 = null;
+
+    public CRServo intake3 = null;
+
+    public Servo transfer3 = null;
 
     // drive train motors
     public DcMotor frontLeft;
@@ -99,19 +113,26 @@ public class teleop extends LinearOpMode {
         initialize();
         //pivot encoder homing
 
+        double intakePower =0;
+        double flywheelPower = 0;
+        double transferPosition = 0;
+        intake1.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake2.setDirection(DcMotorSimple.Direction.FORWARD);
+        intake3.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake1.setPower(0);
+        intake2.setPower(0);
+        intake3.setPower(0);
+        transfer1.setPosition(transferPosition);
+        transfer2.setPosition(transferPosition);
+        transfer3.setPosition(transferPosition);
 
 
         waitForStart();
         eTeleOp.reset();
-        double intakePower =0;
-        double flywheelPower = 0;
-        double transferPosition = 0;
-        transfer.setPosition(transferPosition);
         while (opModeIsActive()) {
 
-
             driveMethod();
-
+/*
             if (gamepad2.b && gamepad2.x) {
                 intakePower = 0;
             }
@@ -127,7 +148,38 @@ public class teleop extends LinearOpMode {
             if (gamepad2.y){
                 flywheelPower = 1;
             }
-            if (gamepad2.right_bumper){
+ */
+            intakePower = 0.0d;
+            if (gamepad2.a) {
+                if (gamepad2.dpad_right) {
+                    intakePower = 1.0d;
+                } else if (gamepad2.dpad_left) {
+                    intakePower = -1.0d;
+                }
+            }
+            intake1.setPower(intakePower);
+            intake2.setPower(intakePower);
+            intake3.setPower(intakePower);
+
+            if (gamepad2.y) {
+                double p = transfer1.getPosition();
+                if (p == 1.0d || p == 0.0d) {
+                    transfer1.setPosition((p == 1.0d) ? 0 : 1);
+                }
+            }
+            if (gamepad2.left_trigger > 0) {
+                double p = transfer2.getPosition();
+                if (p == 1.0d || p == 0.0d) {
+                    transfer2.setPosition((p == 1.0d) ? 0 : 1);
+                }
+            }
+            if (gamepad2.right_trigger > 0) {
+                double p = transfer3.getPosition();
+                if (p == 1.0d || p == 0.0d) {
+                    transfer3.setPosition((p == 1.0d) ? 0 : 1);
+                }
+            }
+//            if (gamepad2.right_bumper){
 
                 if (transferPosition != 0) {
                     telemetry.addData("debug","position 0");
@@ -141,9 +193,8 @@ public class teleop extends LinearOpMode {
                 sleep(500);
                 }
 
-            transfer.setPosition(transferPosition);
-            //flywheel.setPower(flywheelPower);
-            intake.setPower(intakePower);
+        flywheel.setPower(1.0d);
+
             frontLeft.setPower(speedFactor*(frontLeftPower));
             frontRight.setPower(speedFactor*(frontRightPower));
             backLeft.setPower(speedFactor*(backLeftPower));
@@ -151,7 +202,7 @@ public class teleop extends LinearOpMode {
 
 
 
-        }
+//        }
     }
 }
 
