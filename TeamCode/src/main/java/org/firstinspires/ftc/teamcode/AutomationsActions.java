@@ -137,7 +137,7 @@ public class AutomationsActions {
                     if (Objects.equals(Alliance, "red")) {
                         for (ObjectInfo o : Cam.scanTag()) {
                             // TODO: Get real tag id for red
-                            if (Objects.equals(o.objectName, "apriltag id #" + 0)) {
+                            if (Objects.equals(o.objectID, "apriltag id #" + 0)) {
                                 goalTag = o;
                                 packet.put("tag ObjectInfo: ", goalTag.toString());
                                 break;
@@ -146,7 +146,7 @@ public class AutomationsActions {
                     } else {
                         for (ObjectInfo o : Cam.scanTag()) {
                             // TODO: Get real tag id for blue
-                            if (Objects.equals(o.objectName, "apriltag id #" + 24)) {
+                            if (Objects.equals(o.objectID, "apriltag id #" + 24)) {
                                 goalTag = o;
                                 break;
                             }
