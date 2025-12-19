@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,65 +12,76 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.threeten.bp.LocalTime;
 
 
 //
 @TeleOp(name = "Testing TeleOP")
-public class teleop extends LinearOpMode {
+public class teleop_2 extends LinearOpMode {
     public void initialize() {
 
         // setting up drive train
         try {
-        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-        backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
-        backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-        useDrivetrain = true;
-        telemetry.addData("Debug", "drivetrain detected, proceeding with");
-        telemetry.update();
+            frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+            frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+            backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+            backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+            useDrivetrain = true;
+            telemetry.addData("Debug", "drivetrain detected, proceeding with");
+
         } catch (Exception e) {
             telemetry.addData("Debug", "no drivetrain detected, proceeding without");
-            telemetry.update();
+
         }
         try{
-        flywheel = hardwareMap.get(DcMotor.class,"flywheel");
-        useFlywheel = true;
-        telemetry.addData("Debug", "flywheel detected, proceeding with");
-        telemetry.update();
+            flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+            useFlywheel = true;
+            telemetry.addData("Debug", "flywheel detected, proceeding with");
+
         }
         catch (Exception e) {
             telemetry.addData("Debug", "no flywheel detected, proceeding without");
-            telemetry.update();
+
         }
         try{
-        intake = hardwareMap.get(CRServo.class, "intake");
-        useIntake = true;
-        telemetry.addData("Debug", "intake detected, proceeding with");
-        telemetry.update();
+            intake = hardwareMap.get(CRServo.class, "intake2");
+            useIntake = true;
+            telemetry.addData("Debug", "intake detected, proceeding with");
+
         } catch (Exception e) {
             telemetry.addData("Debug", "no intake detected, proceeding without");
-            telemetry.update();
+
         }
         try{
-        transfer = hardwareMap.get(Servo.class,"transfer");
-        useTransfer = true;
-        telemetry.addData("Debug", "transfer detected, proceeding with");
-        telemetry.update();
+            transfer = hardwareMap.get(Servo.class,"transfer2");
+            useTransfer = true;
+            telemetry.addData("Debug", "transfer detected, proceeding with");
+
         } catch (Exception e) {
             telemetry.addData("Debug", "no transfer detected, proceeding without");
-            telemetry.update();
-        }
 
+        }
+        try {
+            colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+            useColorSensor = true;
+            telemetry.addData("Debug", "color sensor detected, proceeding with");
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no color sensor detected, proceeding without");
+
+        }
+        telemetry.update();
 
         if (useFlywheel){
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+//            flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+            flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
         if (useDrivetrain){
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-}   }
+            frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }   }
 
 
     void driveMethod() {
@@ -109,7 +121,7 @@ public class teleop extends LinearOpMode {
     boolean useFlywheel = false;
     boolean useTransfer = false;
     boolean useDrivetrain = false;
-
+    boolean useColorSensor = false;
     public Servo transfer = null;
 
     // drive train motors
@@ -118,6 +130,9 @@ public class teleop extends LinearOpMode {
     public DcMotor backLeft;
     public DcMotor flywheel;
     public DcMotor backRight;
+    public ColorSensor colorSensor;
+
+
 
 
 
@@ -146,8 +161,14 @@ public class teleop extends LinearOpMode {
         double intakePower =0;
         double flywheelPower = 0;
         double transferPosition = 0;
-        transfer.setPosition(transferPosition);
+        if (useTransfer) {
+            transfer.setPosition(transferPosition);
+        }
         while (opModeIsActive()) {
+            telemetry.addData("color (alpha)",colorSensor.alpha());
+            telemetry.addData("color (rgb)",colorSensor.red()+" "+colorSensor.green()+" "+colorSensor.blue());
+            telemetry.update();
+
 
 
             driveMethod();
@@ -177,14 +198,16 @@ public class teleop extends LinearOpMode {
                     telemetry.addData("debug","position 1");
                     telemetry.update();
                     transferPosition = 1;
-                        }
-                sleep(500);
                 }
+                sleep(500);
+            }
             if (useTransfer){
                 transfer.setPosition(transferPosition);
-        }
+            }
             if (useFlywheel){
                 flywheel.setPower(flywheelPower);
+                telemetry.addData("flywheel velocity",flywheel.getCurrentPosition()+", timestamp : "+ LocalTime.now());
+                telemetry.update();
             }
             if (useIntake){
                 intake.setPower(intakePower);
