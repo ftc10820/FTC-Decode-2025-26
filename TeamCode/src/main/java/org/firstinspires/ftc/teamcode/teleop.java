@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 //
@@ -25,7 +26,7 @@ public class teleop extends LinearOpMode {
         frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
         backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-        flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
         intake1 = hardwareMap.get(CRServo.class, "intake1");
         transfer1 = hardwareMap.get(Servo.class,"transfer1");
         intake2 = hardwareMap.get(CRServo.class, "intake2");
@@ -35,11 +36,13 @@ public class teleop extends LinearOpMode {
 
 
 
-        flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
 
@@ -90,8 +93,11 @@ public class teleop extends LinearOpMode {
     public DcMotor frontLeft;
     public DcMotor frontRight;
     public DcMotor backLeft;
-    public DcMotor flywheel;
+    public DcMotorEx flywheel;
     public DcMotor backRight;
+    public final double TICKS_PER_REV = 28.0;
+    public final double FLYWHEEL_RPM = 3000;
+    public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
 
 
 
@@ -149,51 +155,67 @@ public class teleop extends LinearOpMode {
                 flywheelPower = 1;
             }
  */
-            intakePower = 0.0d;
-            if (gamepad2.a) {
-                if (gamepad2.dpad_right) {
-                    intakePower = 1.0d;
-                } else if (gamepad2.dpad_left) {
-                    intakePower = -1.0d;
-                }
+            intakePower = 0;
+            if (gamepad1.b) {
+                intake1.setPower(1);
+                intake2.setPower(0);
+                intake3.setPower(0);
+            } else if (gamepad1.left_trigger>0) {
+                intake2.setPower(1);
+                intake1.setPower(0);
+                intake3.setPower(0);
+            } else if (gamepad1.right_trigger>0) {
+                intake3.setPower(1);
+                intake1.setPower(0);
+                intake2.setPower(0);
+            }else{
+                intake1.setPower(0);
+                intake2.setPower(0);
+                intake3.setPower(0);
             }
-            intake1.setPower(intakePower);
-            intake2.setPower(intakePower);
-            intake3.setPower(intakePower);
 
-            if (gamepad2.y) {
+
+            if (gamepad2.b) {
                 double p = transfer1.getPosition();
                 if (p == 1.0d || p == 0.0d) {
                     transfer1.setPosition((p == 1.0d) ? 0 : 1);
                 }
+                sleep(100);
             }
             if (gamepad2.left_trigger > 0) {
                 double p = transfer2.getPosition();
                 if (p == 1.0d || p == 0.0d) {
                     transfer2.setPosition((p == 1.0d) ? 0 : 1);
                 }
+                sleep(100);
             }
             if (gamepad2.right_trigger > 0) {
                 double p = transfer3.getPosition();
                 if (p == 1.0d || p == 0.0d) {
                     transfer3.setPosition((p == 1.0d) ? 0 : 1);
                 }
+                sleep(100);
             }
 //            if (gamepad2.right_bumper){
+//
+//                if (transferPosition != 0) {
+//                    telemetry.addData("debug","position 0");
+//                    telemetry.update();
+//                    transferPosition = 0;
+//                } else {
+//                    telemetry.addData("debug","position 1");
+//                    telemetry.update();
+//                    transferPosition = 1;
+//                        }
+//            }
+//                sleep(500);
+            if (gamepad2.y){
+                flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+            }else if (gamepad2.a){
+                flywheel.setVelocity(0);
+             }
 
-                if (transferPosition != 0) {
-                    telemetry.addData("debug","position 0");
-                    telemetry.update();
-                    transferPosition = 0;
-                } else {
-                    telemetry.addData("debug","position 1");
-                    telemetry.update();
-                    transferPosition = 1;
-                        }
-                sleep(500);
-                }
 
-        flywheel.setPower(1.0d);
 
             frontLeft.setPower(speedFactor*(frontLeftPower));
             frontRight.setPower(speedFactor*(frontRightPower));
@@ -202,7 +224,7 @@ public class teleop extends LinearOpMode {
 
 
 
-//        }
+        }
     }
 }
 

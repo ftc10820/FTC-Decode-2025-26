@@ -29,13 +29,13 @@ public class RedGoalAuto extends LinearOpMode {
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // initialize HuskyLens
-        HuskyLensCam cam = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 310.47, 200, 29.21, 19.5);
+//        HuskyLensCam cam = new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 310.47, 200, 29.21, 19.5);
 
         // initialize actions
-        AutomationsActions automations = new AutomationsActions();
-        AutomationsActions.Shooter shooter = automations.new Shooter(hardwareMap);
-        AutomationsActions.Transfer transfer = automations.new Transfer(hardwareMap);
-        AutomationsActions.HuskyLensDriveControl camControl = automations.new HuskyLensDriveControl(cam, drive, "red");
+//        AutomationsActions automations = new AutomationsActions();
+//        AutomationsActions.Shooter shooter = automations.new Shooter(hardwareMap);
+//        AutomationsActions.Transfer transfer = automations.new Transfer(hardwareMap);
+//        AutomationsActions.HuskyLensDriveControl camControl = automations.new HuskyLensDriveControl(cam, drive, "red");
 
 
         // waits for start button to be pressed
@@ -43,26 +43,14 @@ public class RedGoalAuto extends LinearOpMode {
 
         // run the actions
         Actions.runBlocking(
-
-                // sequence of actions
-                new SequentialAction(
-
-                        // spins up shooter
-                        shooter.spinUp(),
-
                         // drives to large launch zone
                         //TODO: finalize shooting area
-                        drive.actionBuilder(initialPose)
-                                        .strafeToLinearHeading(new Vector2d(10, 0), Math.toRadians(0))
-                                        .turnTo(Math.toRadians(180))
-                                        .build(),
+                        drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(10, 0), Math.toRadians(0))
 
-                        // automatically align robot to goal (might be replaced by odometry assisted aiming for small launch zone)
-                        camControl.autoAlignGoal()//,
+                                        .build()
 
-                        // transfers ball over to shooter (shoots ball)
-                        //transfer.doTransfer()
-                )
+
+
         );
 
 /*
