@@ -121,16 +121,19 @@ public class teleop extends LinearOpMode {
 
         double intakePower =0;
         double flywheelPower = 0;
-        double transferPosition = 0;
+        double transferPosition1 = 0;
+        double transferPosition2 = 0;
+        double transferPosition3 = 0;
         intake1.setDirection(DcMotorSimple.Direction.FORWARD);
         intake2.setDirection(DcMotorSimple.Direction.FORWARD);
         intake3.setDirection(DcMotorSimple.Direction.REVERSE);
         intake1.setPower(0);
         intake2.setPower(0);
         intake3.setPower(0);
-        transfer1.setPosition(transferPosition);
-        transfer2.setPosition(transferPosition);
-        transfer3.setPosition(transferPosition);
+        transfer1.setPosition(0);
+        transfer2.setPosition(0);
+        transfer3.setPosition(0);
+
 
 
         waitForStart();
@@ -138,6 +141,7 @@ public class teleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             driveMethod();
+
 /*
             if (gamepad2.b && gamepad2.x) {
                 intakePower = 0;
@@ -156,46 +160,37 @@ public class teleop extends LinearOpMode {
             }
  */
             intakePower = 0;
-            if (gamepad1.b) {
+            if (gamepad1.y){
                 intake1.setPower(1);
-                intake2.setPower(0);
-                intake3.setPower(0);
-            } else if (gamepad1.left_trigger>0) {
                 intake2.setPower(1);
-                intake1.setPower(0);
-                intake3.setPower(0);
-            } else if (gamepad1.right_trigger>0) {
                 intake3.setPower(1);
-                intake1.setPower(0);
-                intake2.setPower(0);
-            }else{
+                intakePower = 1;
+            }
+            if (gamepad1.a){
                 intake1.setPower(0);
                 intake2.setPower(0);
                 intake3.setPower(0);
+                intakePower = 0;
+            }
+            if (gamepad2.dpad_left) {
+                transfer1.setPosition(0);
+            }
+            if (gamepad2.dpad_right) {
+                transfer1.setPosition(1);
+            }
+            if (gamepad2.dpad_down) {
+                transfer2.setPosition(0);
+            }
+            if (gamepad2.dpad_up) {
+                transfer2.setPosition(1);
+            }
+            if (gamepad2.x){
+                transfer3.setPosition(0);
+            }
+            if (gamepad2.b){
+                transfer3.setPosition(1);
             }
 
-
-            if (gamepad2.b) {
-                double p = transfer1.getPosition();
-                if (p == 1.0d || p == 0.0d) {
-                    transfer1.setPosition((p == 1.0d) ? 0 : 1);
-                }
-                sleep(100);
-            }
-            if (gamepad2.left_trigger > 0) {
-                double p = transfer2.getPosition();
-                if (p == 1.0d || p == 0.0d) {
-                    transfer2.setPosition((p == 1.0d) ? 0 : 1);
-                }
-                sleep(100);
-            }
-            if (gamepad2.right_trigger > 0) {
-                double p = transfer3.getPosition();
-                if (p == 1.0d || p == 0.0d) {
-                    transfer3.setPosition((p == 1.0d) ? 0 : 1);
-                }
-                sleep(100);
-            }
 //            if (gamepad2.right_bumper){
 //
 //                if (transferPosition != 0) {
