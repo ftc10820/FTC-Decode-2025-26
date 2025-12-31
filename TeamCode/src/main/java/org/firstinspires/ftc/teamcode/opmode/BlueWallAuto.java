@@ -29,7 +29,7 @@ public class BlueWallAuto extends LinearOpMode {
         // instantiate your MecanumDrive at a particular pose.
         Pose2d initialPose = new Pose2d(9, -63, Math.toRadians(0));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-
+        //TODO: find actual params for huskylens
         HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
         // Camera mounted 25 cm high, tilted downward 15°

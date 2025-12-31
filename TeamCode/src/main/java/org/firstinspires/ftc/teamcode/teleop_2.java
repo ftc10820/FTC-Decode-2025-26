@@ -145,8 +145,8 @@ public class teleop_2 extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
-    public final double TICKS_PER_REV = 28.0;
-    public final double FLYWHEEL_RPM = 2700;
+    public final double TICKS_PER_REV = 8192;
+    public final double FLYWHEEL_RPM = 100;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
 
 
@@ -251,7 +251,7 @@ public class teleop_2 extends LinearOpMode {
                     flywheel.setPower(0);
                 }
 
-                telemetry.addData("flywheel velocity",flywheel.getCurrentPosition()+", timestamp : "+ LocalTime.now());
+                telemetry.addData("flywheel",flywheel.getVelocity()+", timestamp : "+ LocalTime.now());
                 telemetry.update();
             }
             if (useIntake){
