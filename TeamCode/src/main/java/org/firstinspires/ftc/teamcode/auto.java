@@ -40,13 +40,16 @@ public class auto extends LinearOpMode {
         rightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftFront.setPower(0.5);
-        leftBack.setPower(0.5);
-        rightBack.setPower(0.5);
-        rightFront.setPower(0.5);
-        sleep(1500);
+        sleep(3000);
         leftFront.setPower(0);
+        leftBack.setPower(0.5);
+        sleep(3000);
         leftBack.setPower(0);
+        rightBack.setPower(0.5);
+        sleep(3000);
         rightBack.setPower(0);
+        rightFront.setPower(0.5);
+        sleep(3000);
         rightFront.setPower(0);
 
     }

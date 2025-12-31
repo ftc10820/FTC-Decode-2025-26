@@ -45,7 +45,7 @@ public class RedGoalAuto extends LinearOpMode {
         Actions.runBlocking(
                         // drives to large launch zone
                         //TODO: finalize shooting area
-                        drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(10, 0), Math.toRadians(0))
+                        drive.actionBuilder(initialPose).strafeToLinearHeading(new Vector2d(60, -48), Math.toRadians(0))
 
                                         .build()
 

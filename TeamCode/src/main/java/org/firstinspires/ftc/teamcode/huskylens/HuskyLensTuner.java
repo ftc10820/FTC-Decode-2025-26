@@ -13,7 +13,7 @@ public class HuskyLensTuner extends LinearOpMode {
         HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
         // Camera mounted 25 cm high, tilted downward 15°
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 41, 27);
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 43.5, 13);
 
         telemetry.addLine("Auto Tune");
         telemetry.addLine("Place target at known height & distance.");
@@ -21,7 +21,8 @@ public class HuskyLensTuner extends LinearOpMode {
 
         waitForStart();
 
-        double tunedFocal = cam.autoTuneFocalLength(this, 108.5,73.66, "apriltag", 150);
+        double tunedFocal = cam.autoTuneFocalLength(this, 152.4
+                ,73.66, "apriltag", 150);
 
         telemetry.addLine("✅ Done!");
         telemetry.addData("Focal length", "%.2f px", tunedFocal);

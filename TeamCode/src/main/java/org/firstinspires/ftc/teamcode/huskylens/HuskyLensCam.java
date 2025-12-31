@@ -180,7 +180,7 @@ public class HuskyLensCam {
     }
     public Pose2d getPoseOf(Pose2d currentPose, ObjectInfo object){
         //TODO: test and verify that the pose functionality is working as expected
-        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),currentPose.position.y-(object.lateralDistance*CM_TO_IN),-(currentPose.heading.log()+Math.toRadians(object.yaw)));
+        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),currentPose.position.y-(object.lateralDistance*CM_TO_IN),(currentPose.heading.log()-Math.toRadians(object.yaw)));
 
     }
     // === Auto Tuning (Downward Tilt Negative) ===

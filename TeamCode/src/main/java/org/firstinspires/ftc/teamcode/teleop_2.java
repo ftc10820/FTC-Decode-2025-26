@@ -16,7 +16,7 @@ import org.threeten.bp.LocalTime;
 
 
 //
-@TeleOp(name = "Testing TeleOP")
+@TeleOp(name = "Testing TeleOP main")
 public class teleop_2 extends LinearOpMode {
     public void initialize() {
 
@@ -26,6 +26,8 @@ public class teleop_2 extends LinearOpMode {
             frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
             backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
             backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+            frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            backRight.setDirection(DcMotorSimple.Direction.REVERSE);
             useDrivetrain = true;
             telemetry.addData("Debug", "drivetrain detected, proceeding with");
 
@@ -34,7 +36,7 @@ public class teleop_2 extends LinearOpMode {
 
         }
         try{
-            flywheel = hardwareMap.get(DcMotor.class,"flywheel");
+            flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
             useFlywheel = true;
             telemetry.addData("Debug", "flywheel detected, proceeding with");
 
@@ -44,7 +46,7 @@ public class teleop_2 extends LinearOpMode {
 
         }
         try{
-            intake = hardwareMap.get(CRServo.class, "intake2");
+            intake = hardwareMap.get(DcMotor.class, "intake");
             useIntake = true;
             telemetry.addData("Debug", "intake detected, proceeding with");
 
@@ -53,7 +55,9 @@ public class teleop_2 extends LinearOpMode {
 
         }
         try{
-            transfer = hardwareMap.get(Servo.class,"transfer2");
+            transfer = hardwareMap.get(Servo.class,"transfer");
+            transfer2 = hardwareMap.get(Servo.class,"transfer2");
+            transfer3 = hardwareMap.get(Servo.class,"transfer3");
             useTransfer = true;
             telemetry.addData("Debug", "transfer detected, proceeding with");
 
@@ -62,9 +66,13 @@ public class teleop_2 extends LinearOpMode {
 
         }
         try {
-            colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+            colorSensor1 = hardwareMap.get(ColorSensor.class, "colorSensor1");
+            colorSensor2 = hardwareMap.get(ColorSensor.class, "colorSensor2");
+            colorSensor3 = hardwareMap.get(ColorSensor.class, "colorSensor3");
+
             useColorSensor = true;
-            telemetry.addData("Debug", "color sensor detected, proceeding with");
+            telemetry.addData("Debug", "color sensor detected, proceeding with. 1: "+colorSensor1.getI2cAddress()+" 2: "+colorSensor2.getI2cAddress()+" 3: "+colorSensor3.getI2cAddress());
+
 
         } catch (Exception e) {
             telemetry.addData("Debug", "no color sensor detected, proceeding without");
@@ -73,7 +81,7 @@ public class teleop_2 extends LinearOpMode {
         telemetry.update();
 
         if (useFlywheel){
-//            flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+            flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
             flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
         if (useDrivetrain){
@@ -86,36 +94,38 @@ public class teleop_2 extends LinearOpMode {
 
     void driveMethod() {
 
-        double y = -gamepad1.left_stick_x;
-        double x = gamepad1.left_stick_y;
-        double turn = gamepad1.right_stick_x;
+        double max;
 
-        double theta = Math.atan2(y, x);
-        double power = Math.hypot(x, y);
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+        double lateral =  gamepad1.left_stick_x;
+        double yaw     =  gamepad1.right_stick_x;
 
-        double sin = Math.sin(theta - Math.PI / 4);
-        double cos = Math.cos(theta - Math.PI / 4);
-        double max = Math.max(Math.abs(sin), Math.abs(cos));
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        frontLeftPower  = axial + lateral + yaw;
+        frontRightPower = axial - lateral - yaw;
+        backLeftPower   = axial - lateral + yaw;
+        backRightPower  = axial + lateral - yaw;
 
-        frontLeftPower = power * cos / max + turn;
-        frontRightPower = power * sin / max - turn;
-        backLeftPower = power * sin / max + turn;
-        backRightPower = power * cos / max - turn;
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
+        max = Math.max(max, Math.abs(backLeftPower));
+        max = Math.max(max, Math.abs(backRightPower));
 
-        if ((power + Math.abs(turn)) > 1) {
-
-            frontLeftPower /= power + Math.abs(turn);
-            frontRightPower /= power + Math.abs(turn);
-            backLeftPower /= power + Math.abs(turn);
-            backRightPower /= power + Math.abs(turn);
-
+        if (max > 1.0) {
+            frontLeftPower  /= max;
+            frontRightPower /= max;
+            backLeftPower   /= max;
+            backRightPower  /= max;
         }
 
 
     }
 
 
-    public CRServo intake = null;
+    public DcMotor intake = null;
 
     boolean useIntake = false;
     boolean useFlywheel = false;
@@ -123,15 +133,21 @@ public class teleop_2 extends LinearOpMode {
     boolean useDrivetrain = false;
     boolean useColorSensor = false;
     public Servo transfer = null;
+    public Servo transfer2 = null;
+    public Servo transfer3 = null;
 
     // drive train motors
     public DcMotor frontLeft;
     public DcMotor frontRight;
     public DcMotor backLeft;
-    public DcMotor flywheel;
+    public DcMotorEx flywheel;
     public DcMotor backRight;
-    public ColorSensor colorSensor;
-
+    public ColorSensor colorSensor1;
+    public ColorSensor colorSensor2;
+    public ColorSensor colorSensor3;
+    public final double TICKS_PER_REV = 28.0;
+    public final double FLYWHEEL_RPM = 2700;
+    public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
 
 
 
@@ -165,9 +181,28 @@ public class teleop_2 extends LinearOpMode {
             transfer.setPosition(transferPosition);
         }
         while (opModeIsActive()) {
-            telemetry.addData("color (alpha)",colorSensor.alpha());
-            telemetry.addData("color (rgb)",colorSensor.red()+" "+colorSensor.green()+" "+colorSensor.blue());
-            telemetry.update();
+            if (useColorSensor){
+            telemetry.addData("color sensor 1 color (rgb)",colorSensor1.red()+" "+colorSensor1.green()+" "+colorSensor1.blue());
+            telemetry.addData("color sensor 2 color (rgb)",colorSensor2.red()+" "+colorSensor2.green()+" "+colorSensor2.blue());
+            telemetry.addData("color sensor 3 color (rgb)",colorSensor3.red()+" "+colorSensor3.green()+" "+colorSensor3.blue());
+            if (colorSensor1.green()>colorSensor1.blue() && colorSensor1.green()>colorSensor1.red()&&colorSensor1.green()>65){
+                telemetry.addData("color sensor 1","green");
+
+            }else{
+                telemetry.addData("color sensor 1","purple");
+            }
+            if (colorSensor2.green()>colorSensor2.blue() && colorSensor2.green()>colorSensor2.red()&&colorSensor2.green()>65){
+                telemetry.addData("color sensor 2","green");
+
+            }else{
+                telemetry.addData("color sensor 2","purple");
+            }
+            if (colorSensor3.green()>colorSensor3.blue() && colorSensor3.green()>colorSensor3.red()&&colorSensor3.green()>65){
+                telemetry.addData("color sensor 3","green");
+
+            }else{
+                telemetry.addData("color sensor 3","purple");
+            }}
 
 
 
@@ -190,22 +225,32 @@ public class teleop_2 extends LinearOpMode {
             }
             if (gamepad2.right_bumper){
 
-                if (transferPosition != 0) {
+
                     telemetry.addData("debug","position 0");
                     telemetry.update();
                     transferPosition = 0;
-                } else {
+                } else if (gamepad2.left_bumper) {
                     telemetry.addData("debug","position 1");
                     telemetry.update();
-                    transferPosition = 1;
-                }
-                sleep(500);
+                    transferPosition = 0.5;
+
+
             }
+            telemetry.update();
             if (useTransfer){
                 transfer.setPosition(transferPosition);
+                transfer2.setPosition(transferPosition);
+                transfer3.setPosition(transferPosition);
+
             }
             if (useFlywheel){
-                flywheel.setPower(flywheelPower);
+                if (gamepad2.y){
+                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                }
+                if (gamepad2.a){
+                    flywheel.setPower(0);
+                }
+
                 telemetry.addData("flywheel velocity",flywheel.getCurrentPosition()+", timestamp : "+ LocalTime.now());
                 telemetry.update();
             }
@@ -218,7 +263,7 @@ public class teleop_2 extends LinearOpMode {
                 backLeft.setPower(speedFactor * (backLeftPower));
                 backRight.setPower(speedFactor * (backRightPower));
             }
-
+            telemetry.update();
 
         }
     }

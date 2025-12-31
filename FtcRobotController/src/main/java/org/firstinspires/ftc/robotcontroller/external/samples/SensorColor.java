@@ -94,22 +94,10 @@ public class SensorColor extends LinearOpMode {
 
     // Get a reference to the RelativeLayout so we can later change the background
     // color of the Robot Controller app to match the hue detected by the RGB sensor.
-    int relativeLayoutId = hardwareMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hardwareMap.appContext.getPackageName());
-    relativeLayout = ((Activity) hardwareMap.appContext).findViewById(relativeLayoutId);
 
-    try {
+
       runSample(); // actually execute the sample
-    } finally {
-      // On the way out, *guarantee* that the background is reasonable. It doesn't actually start off
-      // as pure white, but it's too much work to dig out what actually was used, and this is good
-      // enough to at least make the screen reasonable again.
-      // Set the panel back to the default color
-      relativeLayout.post(new Runnable() {
-        public void run() {
-          relativeLayout.setBackgroundColor(Color.WHITE);
-        }
-      });
-      }
+
   }
 
   protected void runSample() {
