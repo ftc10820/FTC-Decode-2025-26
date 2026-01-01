@@ -21,30 +21,36 @@ import java.util.List;
 public class RedFarLaunchZoneAUTO extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        // TODO: Replace (0,0,0) with actual coordinates
         Pose2d initialPose = new Pose2d(-63,-24,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         Action tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(12,-16),0)
                 .build();
-        // TODO: Make new positions later
         Actions.runBlocking(tab1);
+
         // TODO: Read obelisk
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),0))
                 .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5)))
                 .build();
+        Actions.runBlocking(tab2);
+
         Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5))))
                 // TODO: Check if arrow actually leads to: (new Vector2d(12,-16),0)
                 .splineTo(new Vector2d(7.5,1.875),45)
                 .build();
+        Actions.runBlocking(tab3);
+
         // TODO: Make it shoot the ball
         Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(7.5,1.875),45))
-                // TODO: Figure out real tangent (0 is placeholder)
                 .splineTo(new Vector2d(18,-42.75),0)
                 .build();
+        Actions.runBlocking(tab4);
+
         // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(18,-42.75),0))
                 .splineTo(new Vector2d(12,-16), 45)
                 .build();
+        Actions.runBlocking(tab5);
+        // TODO: Make it shoot the ball
 
 }}
