@@ -18,12 +18,82 @@ import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
 import java.util.List;
 
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+
+
 @Autonomous(name = "Red Far Launch Zone Autonomous", group = "Autonomous")
 public class RedFarLaunchZoneAUTO extends LinearOpMode {
+    public void initialize() {
+
+        // Drivetrain motors
+        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+        backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+        backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+
+        // Flywheel motor
+        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
+
+        // Intake motor
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+
+        // Transfer servos
+        transfer1 = hardwareMap.get(Servo.class,"transfer1");
+        transfer2 = hardwareMap.get(Servo.class,"transfer2");
+        transfer3 = hardwareMap.get(Servo.class,"transfer3");
+
+        // Set motor power behaviors
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    }
+
+    // Transfer servos
+    public Servo transfer1 = null;
+    public Servo transfer2 = null;
+    public Servo transfer3 = null;
+
+
+    // HuskyLens and automation actions
+    HuskyLens huskyLens = null;
+    HuskyLensCam cam = null;
+    AutomationsActions.HuskyLensDriveControl camControl = null;
+    AutomationsActions automations = null;
+
+
+    // Drivetrain motors
+    public DcMotor frontLeft;
+    public DcMotor frontRight;
+    public DcMotor backLeft;
+    public DcMotor backRight;
+
+
+    // Intake and Flywheel motors
+    public DcMotorEx intake;
+    public DcMotorEx flywheel;
+
+
+    // TODO: Figure out if these public final doubles are for the flywheel
+    public final double TICKS_PER_REV = 28.0;
+    public final double FLYWHEEL_RPM = 2700;
+    public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d initialPose = new Pose2d(-63,-24,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+
+        intake.setPower(1);
+        flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(12,-16),0)
