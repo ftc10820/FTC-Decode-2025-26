@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
 import java.util.List;
+
 @Autonomous(name = "Red Far Launch Zone Autonomous", group = "Autonomous")
 public class RedFarLaunchZoneAUTO extends LinearOpMode {
     @Override
@@ -29,29 +30,46 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 .build();
         Actions.runBlocking(tab1);
 
-        // TODO: Read obelisk
+        // TODO: Read obelisk to get the color pattern
+
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),0))
-                .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5)))
+                .splineTo(new Vector2d(12,-16),45)
                 .build();
         Actions.runBlocking(tab2);
 
-        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5))))
-                // TODO: Check if arrow actually leads to: (new Vector2d(12,-16),0)
-                .splineTo(new Vector2d(7.5,1.875),45)
+        // TODO: Shoot preloads to score points
+
+        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),45))
+                .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5)))
                 .build();
         Actions.runBlocking(tab3);
 
-        // TODO: Make it shoot the ball
-        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(7.5,1.875),45))
-                .splineTo(new Vector2d(18,-42.75),0)
+        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5))))
+                .splineTo(new Vector2d(12,-16),45)
                 .build();
         Actions.runBlocking(tab4);
 
-        // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(18,-42.75),0))
-                .splineTo(new Vector2d(12,-16), 45)
+        // TODO: Make it shoot the balls
+
+        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(7.5,1.875),45))
+                // TODO: 9 is a placeholder, need to find real x coordinate
+                .splineTo(new Vector2d(9,-42.75),0)
                 .build();
         Actions.runBlocking(tab5);
+
+        // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
+        // TODO: Control whether tabs 6 and 7 could happen
+
+        Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(18,-42.75),0))
+                .splineTo(new Vector2d(12,-16), 45)
+                .build();
+        Actions.runBlocking(tab6);
+
         // TODO: Make it shoot the ball
+
+        Action tab7 = drive.actionBuilder(new Pose2d(new Vector2d(12, -16),45))
+                .splineTo(new Vector2d(-24,-24), 0)
+                .build();
+        Actions.runBlocking(tab7);
 
 }}
