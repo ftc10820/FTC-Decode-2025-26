@@ -27,11 +27,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import android.app.Activity;
 import android.graphics.Color;
 import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -39,6 +40,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.SwitchableLight;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /*
@@ -50,26 +52,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  *
  * If the color sensor supports adjusting the gain, you can increase the gain (a multiplier to make
  * the sensor report higher values) by holding down the A button on the gamepad, and decrease the
- * gain by holding down the B button on the gamepad. The AndyMark Proximity & Color Sensor does not
+ * gain by holding down the B button on the gamepad. The AndyMark Proximity & BallColor Sensor does not
  * support this.
  *
  * If the color sensor has a light which is controllable from software, you can use the X button on
  * the gamepad to toggle the light on and off. The REV sensors don't support this, but instead have
- * a physical switch on them to turn the light on and off, beginning with REV Color Sensor V2. The
- * AndyMark Proximity & Color Sensor does not support this.
+ * a physical switch on them to turn the light on and off, beginning with REV BallColor Sensor V2. The
+ * AndyMark Proximity & BallColor Sensor does not support this.
  *
  * If the color sensor also supports short-range distance measurements (usually via an infrared
  * proximity sensor), the reported distance will be written to telemetry. As of September 2025,
  * the only color sensors that support this are the ones from REV Robotics and the AndyMark
- * Proximity & Color Sensor. These infrared proximity sensor measurements are only useful at very
+ * Proximity & BallColor Sensor. These infrared proximity sensor measurements are only useful at very
  * small distances, and are sensitive to ambient light and surface reflectivity. You should use a
  * different sensor if you need precise distance measurements.
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Sensor: Color", group = "Sensor")
-@Disabled
+@TeleOp(name = "Sensor: BallColor", group = "Sensor")
 public class SensorColor extends LinearOpMode {
 
   /** The colorSensor field will contain a reference to our color sensor hardware object */
@@ -87,22 +88,16 @@ public class SensorColor extends LinearOpMode {
    * that in this sample we're changing the background color of the robot controller screen as the
    * OpMode runs, and we want to be able to *guarantee* that we restore it to something reasonable
    * and palatable when the OpMode ends. The simplest way to do that is to use a try...finally
-   * block around the main, core logic, and an easy way to make that all clear was to separate
+   * block around the main, core logic, and an easy way to make that all clear was to separate`
    * the former from the latter in separate methods.
    */
   @Override public void runOpMode() {
-
-    // Get a reference to the RelativeLayout so we can later change the background
-    // color of the Robot Controller app to match the hue detected by the RGB sensor.
-
-
       runSample(); // actually execute the sample
-
   }
 
   protected void runSample() {
     // You can give the sensor a gain value, will be multiplied by the sensor's raw value before the
-    // normalized color values are calculated. Color sensors (especially the REV Color Sensor V3)
+    // normalized color values are calculated. BallColor sensors (especially the REV BallColor Sensor V3)
     // can give very low values (depending on the lighting conditions), which only use a small part
     // of the 0-1 range that is available for the red, green, and blue values. In brighter conditions,
     // you should use a smaller gain than in dark conditions. If your gain is too high, all of the
@@ -125,7 +120,7 @@ public class SensorColor extends LinearOpMode {
     // Get a reference to our sensor object. It's recommended to use NormalizedColorSensor over
     // ColorSensor, because NormalizedColorSensor consistently gives values between 0 and 1, while
     // the values you get from ColorSensor are dependent on the specific sensor you're using.
-    colorSensor = hardwareMap.get(NormalizedColorSensor.class, "sensor_color");
+    colorSensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
 
     // If possible, turn the light on in the beginning (it might already be on anyway,
     // we just make sure it is if we can).
@@ -180,7 +175,7 @@ public class SensorColor extends LinearOpMode {
        * HSV (hue, saturation and value) values. See http://web.archive.org/web/20190311170843/https://infohost.nmt.edu/tcc/help/pubs/colortheory/web/hsv.html
        * for an explanation of HSV color. */
 
-      // Update the hsvValues array by passing it to Color.colorToHSV()
+      // Update the hsvValues array by passing it to BallColor.colorToHSV()
       Color.colorToHSV(colors.toColor(), hsvValues);
 
       telemetry.addLine()
@@ -203,11 +198,6 @@ public class SensorColor extends LinearOpMode {
       telemetry.update();
 
       // Change the Robot Controller's background color to match the color detected by the color sensor.
-      relativeLayout.post(new Runnable() {
-        public void run() {
-          relativeLayout.setBackgroundColor(Color.HSVToColor(hsvValues));
-        }
-      });
     }
   }
 }

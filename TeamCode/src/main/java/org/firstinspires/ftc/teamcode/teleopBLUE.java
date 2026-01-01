@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 //
 @Config
 @TeleOp
-public class teleop extends LinearOpMode {
+public class teleopBLUE extends LinearOpMode {
     public void initialize() {
 
         // setting up drive train
@@ -35,9 +35,11 @@ public class teleop extends LinearOpMode {
         transfer2 = hardwareMap.get(Servo.class,"transfer2");
         intake3 = hardwareMap.get(CRServo.class, "intake3");
         transfer3 = hardwareMap.get(Servo.class,"transfer3");
-
-
-
+        huskyLens = hardwareMap.get(HuskyLens.class,"huskylens");
+        cam = new HuskyLensCam(huskyLens, 319.56, 200, 43.5, 13);
+        automations = new AutomationsActions();
+        camControl = automations.new HuskyLensDriveControl(cam, drive, "blue");
+        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
 
         //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -51,8 +53,8 @@ public class teleop extends LinearOpMode {
 
     void driveMethod() {
 
-        double y = -gamepad1.left_stick_x;
-        double x = gamepad1.left_stick_y;
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x;
         double turn = gamepad1.right_stick_x;
 
         double theta = Math.atan2(y, x);
@@ -92,6 +94,7 @@ public class teleop extends LinearOpMode {
 
     public Servo transfer3 = null;
     HuskyLens huskyLens = null;
+    MecanumDrive drive = null;
     HuskyLensCam cam = null;
     AutomationsActions.HuskyLensDriveControl camControl = null;
     AutomationsActions automations = null;
@@ -196,7 +199,11 @@ public class teleop extends LinearOpMode {
             if (gamepad2.b){
                 transfer3.setPosition(1);
             }
-
+            if (gamepad1.left_trigger>0){
+                drive.localizer.setPose(new Pose2d(0, 0, Math.toRadians(0)));
+                Actions.runBlocking(camControl.autoAlignGoal());
+                sleep(1);
+            }
 
 //            if (gamepad2.right_bumper){
 //

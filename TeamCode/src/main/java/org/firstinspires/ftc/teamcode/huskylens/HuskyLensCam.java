@@ -79,7 +79,7 @@ public class HuskyLensCam {
     private void setFocalPoint(double focalPoint) { this.focalPoint = focalPoint; }
 
     // === Core Computation Helper ===
-    private ObjectInfo processBlock(HuskyLens.Block block, double realWidth, String type, String label) {
+    private ObjectInfo processBlock(HuskyLens.Block block, double realWidth, String type, int id) {
         LocalTime time = LocalTime.now();
 
         // Pixel offsets
@@ -117,7 +117,7 @@ public class HuskyLensCam {
 
         return new ObjectInfo(
                 block.x, block.y,
-                type, label,
+                type, id,
                 distance,
                 lateralDistance, // <--- Pass the new value here
                 yawAngleDeg,
@@ -144,14 +144,15 @@ public class HuskyLensCam {
 
             if (block.y <= getSpecimenScreenYLimit()) {
                 double realWidth = widthOfGameElements.get("specimen");
-                String colorName = idToColor.getOrDefault(block.id, "Unknown");
-                objects.add(processBlock(block, realWidth, "color", colorName));
+
+                objects.add(processBlock(block, realWidth, "color", block.id));
             }
         }
         return objects;
     }
 
-    // === AprilTag Recognition ===
+    // === AprilTag R
+    // ecognition ===
     public List<ObjectInfo> scanTag() {
         List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
         HuskyLens camera = getCamera();
@@ -164,7 +165,7 @@ public class HuskyLensCam {
 
         for (HuskyLens.Block block : apriltagBlocks) {
             double realWidth = widthOfGameElements.get("apriltag");
-            objects.add(processBlock(block, realWidth, "apriltag", "apriltag id #" + block.id));
+            objects.add(processBlock(block, realWidth, "apriltag", block.id));
         }
         return objects;
     }
@@ -179,7 +180,7 @@ public class HuskyLensCam {
     }
     public Pose2d getPoseOf(Pose2d currentPose, ObjectInfo object){
         //TODO: test and verify that the pose functionality is working as expected
-        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),(object.lateralDistance*CM_TO_IN)-currentPose.position.y,currentPose.heading.log()+Math.toRadians(object.yaw));
+        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),currentPose.position.y-(object.lateralDistance*CM_TO_IN),(currentPose.heading.log()-Math.toRadians(object.yaw)));
 
     }
     // === Auto Tuning (Downward Tilt Negative) ===
