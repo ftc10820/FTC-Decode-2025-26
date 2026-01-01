@@ -4,22 +4,15 @@ package org.firstinspires.ftc.teamcode.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
-import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.DecodeConstants;
+import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.Shooter;
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
-
-import java.util.List;
 
 @Config
 @Autonomous(name = "RED_GOAL_AUTO", group = "Autonomous")
@@ -32,22 +25,25 @@ public class RedGoalAuto extends LinearOpMode {
         //TODO: find the actual heading
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-        Servo hlServo = hardwareMap.get(Servo.class,"hlServo");
-
+        AutomationsActions actions = new AutomationsActions();
         //HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
         //TODO: find actual params for huskylens
         //HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 33.02, 19.5);
 
-        Shooter shooter = new Shooter(hardwareMap);
+        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
+        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
 
         // Go to initial  shooting position
         Action tab1 = drive.actionBuilder(initialPose)
                 .lineToX(20)
                 .build();
         waitForStart();
-        Actions.runBlocking(tab1);
-        hlServo.setPosition(0);
+        Actions.runBlocking(new SequentialAction(tab1, hlServo.lookRight()));
+
+
+
+
 
         //  Look at obelisk
 //        List<ObjectInfo> tags = cam.scanTag();

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import static java.lang.Thread.sleep;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -222,11 +224,59 @@ public class AutomationsActions {
                 return false;
             }
         }
-
         public Action autoAlignGoal() {
             return new AutoAlignGoal();
         }
 
+    }
+    public class HuskyLensServo{
+        private final Servo hlServo;
+        public HuskyLensServo(HardwareMap hardwareMap){
+            hlServo = hardwareMap.get(Servo.class,"hlServo");
+        }
+        public class LookRight implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_RIGHT);
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                packet.put("hlServo pos",hlServo.getPosition());
+                return false;
+            }
+        }
+        //TODO: create LookLeft
+        public class LookForward implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_FORWARD);
+                packet.put("hlServo pos",hlServo.getPosition());
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return false;
+            }
+        }
+        public class LookBack implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_BACK);
+                packet.put("hlServo pos",hlServo.getPosition());
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                return false;
+            }
+        }
+        public Action lookRight() {return new LookRight();}
+        public Action lookForward() {return new LookForward();}
+        public Action lookBack() {return new LookBack();}
     }
 
     }
