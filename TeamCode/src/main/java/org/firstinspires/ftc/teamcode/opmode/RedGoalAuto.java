@@ -11,7 +11,9 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.DecodeConstants;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Shooter;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
@@ -28,9 +30,9 @@ public class RedGoalAuto extends LinearOpMode {
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
         //TODO: find the actual heading
-        Pose2d initialPose = new Pose2d(64, -64, Math.toRadians(45));
+        Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-
+        Servo hlServo = hardwareMap.get(Servo.class,"hlServo");
 
         //HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
@@ -41,10 +43,12 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial  shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(20, 67),Math.toRadians(45))
+                .lineToX(20)
                 .build();
         waitForStart();
         Actions.runBlocking(tab1);
+        hlServo.setPosition(0);
+
         //  Look at obelisk
 //        List<ObjectInfo> tags = cam.scanTag();
 

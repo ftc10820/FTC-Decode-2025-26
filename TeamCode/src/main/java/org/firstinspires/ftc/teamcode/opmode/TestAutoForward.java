@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-@Autonomous(name = "Test Auto Forward", group = "Test")
+@Autonomous(name = "Test Auto Forward", group = "utils")
 public class TestAutoForward extends LinearOpMode {
 
     @Override
