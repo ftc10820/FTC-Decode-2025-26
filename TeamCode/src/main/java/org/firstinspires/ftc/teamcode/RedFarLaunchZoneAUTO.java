@@ -35,7 +35,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         intake = hardwareMap.get(DcMotorEx.class, "intake");
 
         // Transfer servos
-        transfer1 = hardwareMap.get(Servo.class,"transfer1");
+        transfer1 = hardwareMap.get(Servo.class,"transfer");
         transfer2 = hardwareMap.get(Servo.class,"transfer2");
         transfer3 = hardwareMap.get(Servo.class,"transfer3");
 
@@ -74,7 +74,6 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     public DcMotorEx flywheel;
 
 
-    // TODO: Figure out if these public final doubles are for the flywheel
     public final double TICKS_PER_REV = 28.0;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
@@ -82,12 +81,14 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        waitForStart();
+
         // Set initial position for starting the match (Red Far Launch Zone)
         Pose2d initialPose = new Pose2d(-63,-24,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        // Set intake and flywheel motor powers to run constant
-        intake.setPower(1);
+        // Set flywheel motor powers to run constant
         flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
@@ -97,19 +98,21 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         // TODO: Read obelisk to get the motif
 
-        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),0))
-                .splineTo(new Vector2d(12,-16),45)
+        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),0))
+                .splineTo(new Vector2d(12,-24),45)
                 .build();
         Actions.runBlocking(tab2);
 
         // TODO: Shoot preloads to score points
 
-        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),45))
-                .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5)))
+        intake.setPower(1);
+
+        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
+                .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15)))
                 .build();
         Actions.runBlocking(tab3);
 
-        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5))))
+        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15))))
                 .splineTo(new Vector2d(12,-24),45)
                 .build();
         Actions.runBlocking(tab4);
@@ -118,14 +121,14 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
                 // TODO: 9 is a placeholder, need to find real x coordinate
-                .splineTo(new Vector2d(9,-42.75),0)
+                .splineTo(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3)))
                 .build();
         Actions.runBlocking(tab5);
 
         // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
         // TODO: Control whether tabs 6 and 7 could happen
 
-        Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(18,-42.75),0))
+        Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3))))
                 .splineTo(new Vector2d(12,-24), 45)
                 .build();
         Actions.runBlocking(tab6);
