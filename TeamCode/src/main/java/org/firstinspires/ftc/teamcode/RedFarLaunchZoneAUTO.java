@@ -102,7 +102,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 .build();
         Actions.runBlocking(tab1);
 
-        // TODO: Read obelisk to get the color pattern
+        // TODO: Read obelisk to get the motif
 
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-16),0))
                 .splineTo(new Vector2d(12,-16),45)
