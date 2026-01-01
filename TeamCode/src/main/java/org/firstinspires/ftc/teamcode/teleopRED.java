@@ -29,16 +29,14 @@ public class teleopRED extends LinearOpMode {
         backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
         backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
         flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
-        intake1 = hardwareMap.get(CRServo.class, "intake1");
+        intake1 = hardwareMap.get(DcMotor.class, "intake");
         transfer1 = hardwareMap.get(Servo.class,"transfer1");
-        intake2 = hardwareMap.get(CRServo.class, "intake2");
         transfer2 = hardwareMap.get(Servo.class,"transfer2");
-        intake3 = hardwareMap.get(CRServo.class, "intake3");
         transfer3 = hardwareMap.get(Servo.class,"transfer3");
         huskyLens = hardwareMap.get(HuskyLens.class,"huskylens");
         cam = new HuskyLensCam(huskyLens, 319.56, 200, 43.5, 13);
         automations = new AutomationsActions();
-        camControl = automations.new HuskyLensDriveControl(cam, drive, "red");
+        camControl = automations.new HuskyLens(cam, drive, "red");
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
 
         //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -82,21 +80,21 @@ public class teleopRED extends LinearOpMode {
     }
 
 
-    public CRServo intake1 = null;
+    public DcMotor intake1 = null;
 
     public Servo transfer1 = null;
 
-    public CRServo intake2 = null;
+
 
     public Servo transfer2 = null;
 
-    public CRServo intake3 = null;
+
 
     public Servo transfer3 = null;
     HuskyLens huskyLens = null;
     MecanumDrive drive = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLensDriveControl camControl = null;
+    AutomationsActions.HuskyLens camControl = null;
     AutomationsActions automations = null;
     // drive train motors
     public DcMotor frontLeft;
@@ -134,11 +132,9 @@ public class teleopRED extends LinearOpMode {
         double transferPosition2 = 0;
         double transferPosition3 = 0;
         intake1.setDirection(DcMotorSimple.Direction.FORWARD);
-        intake2.setDirection(DcMotorSimple.Direction.FORWARD);
-        intake3.setDirection(DcMotorSimple.Direction.REVERSE);
+
         intake1.setPower(0);
-        intake2.setPower(0);
-        intake3.setPower(0);
+
         transfer1.setPosition(0);
         transfer2.setPosition(0);
         transfer3.setPosition(0);
@@ -171,14 +167,12 @@ public class teleopRED extends LinearOpMode {
             intakePower = 0;
             if (gamepad1.y){
                 intake1.setPower(1);
-                intake2.setPower(1);
-                intake3.setPower(1);
+
                 intakePower = 1;
             }
             if (gamepad1.a){
                 intake1.setPower(0);
-                intake2.setPower(0);
-                intake3.setPower(0);
+
                 intakePower = 0;
             }
             if (gamepad2.dpad_left) {
@@ -229,6 +223,11 @@ public class teleopRED extends LinearOpMode {
                 transfer2.setPosition(.13);
                 transfer3.setPosition(.13);
                 flywheel.setPower(-0.15);
+            }
+            if(gamepad2.left_bumper){
+                telemetry.addData("debug",camControl.getShootingOrder());
+                telemetry.update();
+
             }
 
 

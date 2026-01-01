@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class AutomationsActions {
@@ -160,14 +161,14 @@ public class AutomationsActions {
             return new DoTransfer(sequenceId);
         }
     }
-    public class HuskyLensDriveControl {
+    public class HuskyLens {
         private final HuskyLensCam Cam;
         private ObjectInfo goalTag = null;
         private final String Alliance;
         private final MecanumDrive Drive;
 
 
-        public HuskyLensDriveControl(HuskyLensCam cam, MecanumDrive drive, String alliance) {
+        public HuskyLens(HuskyLensCam cam, MecanumDrive drive, String alliance) {
             Cam = cam;
             if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")){
                 throw new IllegalArgumentException("Invalid alliance: " + alliance+ "\n use red or blue");
@@ -176,7 +177,25 @@ public class AutomationsActions {
             Drive = drive;
         }
 
-        //TODO: change this name to be more practical
+        public BallColor[] getShootingOrder() {
+            BallColor[] ShootingOrder = null;
+            ObjectInfo tag;
+            tag = Cam.scanTag().get(0);
+            if (tag.objectID == 1){
+                ShootingOrder = new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
+
+            }
+            else if (tag.objectID == 2){
+                ShootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE};
+            }
+            else if (tag.objectID == 3){
+                ShootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN};
+            }
+            return ShootingOrder;
+
+
+
+        }
         public class AutoAlignGoal implements Action {
             private boolean initialized = false;
             private Action trajectoryAction;

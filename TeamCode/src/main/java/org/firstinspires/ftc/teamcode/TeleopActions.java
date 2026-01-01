@@ -35,7 +35,7 @@ public class TeleopActions extends LinearOpMode {
         automations = new AutomationsActions();
         transfer = automations.new Transfer(hardwareMap);
         shooter = automations.new Shooter(hardwareMap);
-        camControl = automations.new HuskyLensDriveControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 247.07, 200, 29.21, 27), new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0))), "red");
+        camControl = automations.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"), 247.07, 200, 29.21, 27), new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0))), "red");
 
 
 
@@ -94,7 +94,7 @@ public class TeleopActions extends LinearOpMode {
     public AutomationsActions automations;
     public AutomationsActions.Shooter shooter;
     public AutomationsActions.Transfer transfer;
-    public AutomationsActions.HuskyLensDriveControl camControl;
+    public AutomationsActions.HuskyLens camControl;
 
 
     // there are specific ways that the drive power is calculated based on automations

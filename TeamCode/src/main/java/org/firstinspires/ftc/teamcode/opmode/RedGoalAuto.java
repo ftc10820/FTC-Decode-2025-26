@@ -8,11 +8,13 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 
 @Config
 @Autonomous(name = "RED_GOAL_AUTO", group = "Autonomous")
@@ -26,21 +28,23 @@ public class RedGoalAuto extends LinearOpMode {
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         AutomationsActions actions = new AutomationsActions();
-        //HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-
-        //TODO: find actual params for huskylens
-        //HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 33.02, 19.5);
+        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 33.02, 19.5);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
+        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
+
 
         // Go to initial  shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(20)
+                .lineToX(30)
                 .build();
         waitForStart();
         Actions.runBlocking(new SequentialAction(tab1, hlServo.lookRight()));
-
+        telemetry.addData("ball order", camControl.getShootingOrder());
+        telemetry.update();
+        sleep(5000);
 
 
 

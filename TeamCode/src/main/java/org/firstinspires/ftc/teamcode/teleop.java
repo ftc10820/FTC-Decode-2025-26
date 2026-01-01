@@ -2,8 +2,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -93,7 +91,7 @@ public class teleop extends LinearOpMode {
     public Servo transfer3 = null;
     HuskyLens huskyLens = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLensDriveControl camControl = null;
+    AutomationsActions.HuskyLens camControl = null;
     AutomationsActions automations = null;
     // drive train motors
     public DcMotor frontLeft;

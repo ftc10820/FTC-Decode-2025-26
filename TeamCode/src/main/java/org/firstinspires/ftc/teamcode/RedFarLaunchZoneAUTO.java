@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
 // RR-specific imports
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -12,16 +11,10 @@ import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
-import java.util.List;
-
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
@@ -65,7 +58,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     // HuskyLens and automation actions
     HuskyLens huskyLens = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLensDriveControl camControl = null;
+    AutomationsActions.HuskyLens camControl = null;
     AutomationsActions automations = null;
 
 

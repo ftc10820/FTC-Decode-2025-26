@@ -1,6 +1,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.Pose2d;
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -12,7 +14,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.threeten.bp.LocalTime;
+
+import java.util.Arrays;
 
 
 //
@@ -76,6 +81,16 @@ public class teleop_2 extends LinearOpMode {
 
         } catch (Exception e) {
             telemetry.addData("Debug", "no color sensor detected, proceeding without");
+
+        }
+        try{
+            AutomationsActions actions = new AutomationsActions();
+            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),200,200,20,2),new MecanumDrive(hardwareMap,new Pose2d(0,0,0)),"red");
+            isUseCam = true;
+            telemetry.addData("Debug", "cam detected, proceeding with");
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no cam detected, proceeding without");
 
         }
         telemetry.update();
@@ -145,9 +160,11 @@ public class teleop_2 extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
+    public AutomationsActions.HuskyLens camControl;
     public final double TICKS_PER_REV = 8192;
     public final double FLYWHEEL_RPM = 100;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+    public boolean isUseCam = false;
 
 
 
@@ -227,22 +244,23 @@ public class teleop_2 extends LinearOpMode {
 
 
                     telemetry.addData("debug","position 0");
-                    telemetry.update();
+
                     transferPosition = 0;
                 } else if (gamepad2.left_bumper) {
                     telemetry.addData("debug","position 1");
-                    telemetry.update();
+
                     transferPosition = 0.5;
 
 
             }
-            telemetry.update();
+
             if (useTransfer){
                 transfer.setPosition(transferPosition);
                 transfer2.setPosition(transferPosition);
                 transfer3.setPosition(transferPosition);
 
             }
+
             if (useFlywheel){
                 if (gamepad2.y){
                     flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
@@ -252,10 +270,20 @@ public class teleop_2 extends LinearOpMode {
                 }
 
                 telemetry.addData("flywheel",flywheel.getVelocity()+", timestamp : "+ LocalTime.now());
-                telemetry.update();
+
             }
             if (useIntake){
                 intake.setPower(intakePower);
+            }
+            if(isUseCam){
+                if (gamepad2.left_trigger>0){
+                    try{
+                    telemetry.addData("cam", Arrays.toString(camControl.getShootingOrder()));
+                    } catch (Exception e){
+                        telemetry.addData("cam","no tag detected");
+
+                    }
+                }
             }
             if (useDrivetrain) {
                 frontLeft.setPower(speedFactor * (frontLeftPower));

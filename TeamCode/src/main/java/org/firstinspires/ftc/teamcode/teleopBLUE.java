@@ -38,7 +38,7 @@ public class teleopBLUE extends LinearOpMode {
         huskyLens = hardwareMap.get(HuskyLens.class,"huskylens");
         cam = new HuskyLensCam(huskyLens, 319.56, 200, 43.5, 13);
         automations = new AutomationsActions();
-        camControl = automations.new HuskyLensDriveControl(cam, drive, "blue");
+        camControl = automations.new HuskyLens(cam, drive, "blue");
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
 
         //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -96,7 +96,7 @@ public class teleopBLUE extends LinearOpMode {
     HuskyLens huskyLens = null;
     MecanumDrive drive = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLensDriveControl camControl = null;
+    AutomationsActions.HuskyLens camControl = null;
     AutomationsActions automations = null;
     // drive train motors
     public DcMotor frontLeft;
