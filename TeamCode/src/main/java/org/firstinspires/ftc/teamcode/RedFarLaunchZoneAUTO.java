@@ -91,7 +91,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(12,-16),0)
+                .splineTo(new Vector2d(12,-24),0)
                 .build();
         Actions.runBlocking(tab1);
 
@@ -110,13 +110,13 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Actions.runBlocking(tab3);
 
         Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(47.625/10.5))))
-                .splineTo(new Vector2d(12,-16),45)
+                .splineTo(new Vector2d(12,-24),45)
                 .build();
         Actions.runBlocking(tab4);
 
         // TODO: Make it shoot the balls
 
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(7.5,1.875),45))
+        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
                 // TODO: 9 is a placeholder, need to find real x coordinate
                 .splineTo(new Vector2d(9,-42.75),0)
                 .build();
@@ -126,13 +126,13 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // TODO: Control whether tabs 6 and 7 could happen
 
         Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(18,-42.75),0))
-                .splineTo(new Vector2d(12,-16), 45)
+                .splineTo(new Vector2d(12,-24), 45)
                 .build();
         Actions.runBlocking(tab6);
 
         // TODO: Make it shoot the ball
 
-        Action tab7 = drive.actionBuilder(new Pose2d(new Vector2d(12, -16),45))
+        Action tab7 = drive.actionBuilder(new Pose2d(new Vector2d(12, -24),45))
                 .splineTo(new Vector2d(-24,-24), 0)
                 .build();
         Actions.runBlocking(tab7);
