@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
 public class DecodeConstants {
-    public final double HLSERVO_LOOK_LEFT = 0;
-    public final double HLSERVO_LOOK_FORWARD = 0.3;
+    public static final double HLSERVO_LOOK_LEFT = 0;
+    public static final double HLSERVO_LOOK_FORWARD = 0.3;
     //TODO: find position of right
-    public final double HLSERVO_LOOK_BACK = 1;
+    public static final double HLSERVO_LOOK_BACK = 1;
 }
