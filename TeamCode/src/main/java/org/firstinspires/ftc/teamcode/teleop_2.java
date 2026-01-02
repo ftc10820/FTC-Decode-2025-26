@@ -161,8 +161,8 @@ public class teleop_2 extends LinearOpMode {
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
     public AutomationsActions.HuskyLens camControl;
-    public final double TICKS_PER_REV = 8192;
-    public final double FLYWHEEL_RPM = 100;
+    public final double TICKS_PER_REV = 28;
+    public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
     public boolean isUseCam = false;
 
@@ -249,7 +249,7 @@ public class teleop_2 extends LinearOpMode {
                 } else if (gamepad2.left_bumper) {
                     telemetry.addData("debug","position 1");
 
-                    transferPosition = 0.5;
+                    transferPosition = 0.45;
 
 
             }

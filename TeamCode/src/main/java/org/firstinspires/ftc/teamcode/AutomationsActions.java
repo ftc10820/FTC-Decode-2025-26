@@ -58,7 +58,7 @@ public class AutomationsActions {
                 double vel = motor.getVelocity();
                 packet.put("shooterVelocity goal",-FLYWHEEL_TICKS_PER_REV);
                 packet.put("shooterVelocity", vel);
-                return vel < FLYWHEEL_TICKS_PER_REV;
+                return (vel < FLYWHEEL_TICKS_PER_REV);
             }
         }
 
@@ -72,18 +72,18 @@ public class AutomationsActions {
         private final Servo transfer1, transfer2, transfer3;
         private final ColorSensor colorSensor1, colorSensor2, colorSensor3;
 
-        // Corrected values based on user feedback: Initial is 1.0, Active is 0.5
-        private static final double POS_INITIAL = 0;
-        private static final double POS_ACTIVE = 1;
-        private static final double WAIT_TIME = 1.0; // Time between each servo firing
+
+        private static final double POS_INITIAL = 0.45;
+        private static final double POS_ACTIVE = 0;
+        private static final double WAIT_TIME = 2.0; // Time between each servo firing
 
         public Transfer(HardwareMap hardwareMap) {
             transfer1 = hardwareMap.get(Servo.class, "transfer");
             transfer2 = hardwareMap.get(Servo.class, "transfer2");
             transfer3 = hardwareMap.get(Servo.class, "transfer3");
-            transfer1.setDirection(Servo.Direction.REVERSE);
-            transfer2.setDirection(Servo.Direction.REVERSE);
-            transfer3.setDirection(Servo.Direction.REVERSE);
+//            transfer1.setDirection(Servo.Direction.REVERSE);
+//            transfer2.setDirection(Servo.Direction.REVERSE);
+//            transfer3.setDirection(Servo.Direction.REVERSE);
             colorSensor1 = hardwareMap.get(ColorSensor.class, "colorSensor1");
             colorSensor2 = hardwareMap.get(ColorSensor.class, "colorSensor2");
             colorSensor3 = hardwareMap.get(ColorSensor.class, "colorSensor3");
@@ -131,14 +131,16 @@ public class AutomationsActions {
             private final int[] sequence;
             private int currentStep = 0;
             private boolean isWaiting = false;
-
+            HashMap<Integer, BallColor> detectedColors = new HashMap<>();
+            List<Integer> builtSequence = new ArrayList<>();
             public DoTransfer(BallColor[] shootingOrder) {
-                HashMap<Integer, BallColor> detectedColors = new HashMap<>();
+
                 detectedColors.put(1, getColorOfSensor(1));
                 detectedColors.put(2, getColorOfSensor(2));
                 detectedColors.put(3, getColorOfSensor(3));
 
-                List<Integer> builtSequence = new ArrayList<>();
+
+
                 List<Integer> availablePositions = new ArrayList<>(Arrays.asList(1, 2, 3));
 
                 for (BallColor desiredColor : shootingOrder) {
@@ -170,7 +172,8 @@ public class AutomationsActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-
+                packet.put("detected colors",detectedColors.toString());
+                packet.put("shooting sequence", Arrays.toString(sequence));
                 if (currentStep >= sequence.length) {
                     return false;
                 }
