@@ -107,7 +107,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(18,-18), Math.toRadians(-135))
+                .splineTo(new Vector2d(18,-18), Math.toRadians(360-45))
                 .build();
         Actions.runBlocking(tab1);
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
