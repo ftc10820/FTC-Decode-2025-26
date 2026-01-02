@@ -87,7 +87,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Set initial position for starting the match (Red Far Launch Zone)
-        Pose2d initialPose = new Pose2d(-63,-18,0);
+        Pose2d initialPose = new Pose2d(18,-63,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // Automation Actions and HuskyLens
@@ -114,8 +114,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-        // TODO: Read obelisk to get the motif
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp()), hlServo.lookRight()));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
         Actions.runBlocking(transfer.doTransfer(shootingOrder));
 
         /* intake.setPower(1);
