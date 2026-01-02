@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -33,9 +34,10 @@ public class AutomationsActions {
 
     public class Shooter {
         private final DcMotorEx motor;
-        public final double TICKS_PER_REV = 8192;
+        public final double TICKS_PER_REV = 28;
         public final double FLYWHEEL_RPM = 2000;
         public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+
         public Shooter(HardwareMap hardwareMap) {
             motor = hardwareMap.get(DcMotorEx.class, "flywheel");
 
@@ -48,8 +50,8 @@ public class AutomationsActions {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     motor.setDirection(DcMotorEx.Direction.REVERSE);
-
-                    motor.setVelocity(-FLYWHEEL_TICKS_PER_REV);
+                    motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    motor.setVelocity(FLYWHEEL_TICKS_PER_REV);
                     initialized = true;
                 }
 
