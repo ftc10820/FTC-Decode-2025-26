@@ -2,9 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 // RR-specific imports
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.AngularVelConstraint;
+import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -107,9 +110,14 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(18,-18), Math.toRadians(360-45))
+                .splineTo(new Vector2d(24,-24), Math.toRadians(135),new MinVelConstraint(Arrays.asList(
+                        new TranslationalVelConstraint(30),
+                        new AngularVelConstraint(Math.toRadians(20))
+                )))
                 .build();
-        Actions.runBlocking(tab1);
+        Actions.runBlocking(new SequentialAction(
+                tab1,
+                hlServo.lookRight()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();

@@ -193,7 +193,7 @@ public class teleop_2 extends LinearOpMode {
         eTeleOp.reset();
         double intakePower =0;
         double flywheelPower = 0;
-        double transferPosition = 0;
+        double transferPosition = 1;
         if (useTransfer) {
             transfer.setPosition(transferPosition);
         }
