@@ -8,6 +8,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -16,22 +17,28 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class AutomationsActions {
-    private enum TransferState {
-        INITIAL,
-        POS_1,
-        WAITING,
-        POS_0,
-        FINISHED
+
+    public enum BallColor {
+        GREEN,
+        PURPLE,
+        NONE
     }
+
     public class Shooter {
         private final DcMotorEx motor;
-
+        public final double TICKS_PER_REV = 8192;
+        public final double FLYWHEEL_RPM = 2000;
+        public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
         public Shooter(HardwareMap hardwareMap) {
             motor = hardwareMap.get(DcMotorEx.class, "flywheel");
+
         }
 
         public class SpinUp implements Action {
@@ -41,13 +48,15 @@ public class AutomationsActions {
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     motor.setDirection(DcMotorEx.Direction.REVERSE);
-                    motor.setPower(0.8);
+
+                    motor.setVelocity(-FLYWHEEL_TICKS_PER_REV);
                     initialized = true;
                 }
 
                 double vel = motor.getVelocity();
+                packet.put("shooterVelocity goal",-FLYWHEEL_TICKS_PER_REV);
                 packet.put("shooterVelocity", vel);
-                return vel < 10_000.0;
+                return vel < FLYWHEEL_TICKS_PER_REV;
             }
         }
 
@@ -57,53 +66,95 @@ public class AutomationsActions {
 
     }
 
-
-
     public class Transfer {
-        private final Servo transfer1;
-        private final Servo transfer2;
-        private final Servo transfer3;
+        private final Servo transfer1, transfer2, transfer3;
+        private final ColorSensor colorSensor1, colorSensor2, colorSensor3;
 
-        // Define positions for all servos
-        private static final double POS_INITIAL = 0.0;
-        private static final double POS_ACTIVE = 1.0;
-        private static final double WAIT_TIME = 0.5; // Gap time between servo movements
+        // Corrected values based on user feedback: Initial is 1.0, Active is 0.5
+        private static final double POS_INITIAL = 0;
+        private static final double POS_ACTIVE = 1;
+        private static final double WAIT_TIME = 1.0; // Time between each servo firing
 
         public Transfer(HardwareMap hardwareMap) {
-            transfer1 = hardwareMap.get(Servo.class, "transfer1");
+            transfer1 = hardwareMap.get(Servo.class, "transfer");
             transfer2 = hardwareMap.get(Servo.class, "transfer2");
             transfer3 = hardwareMap.get(Servo.class, "transfer3");
+            transfer1.setDirection(Servo.Direction.REVERSE);
+            transfer2.setDirection(Servo.Direction.REVERSE);
+            transfer3.setDirection(Servo.Direction.REVERSE);
+            colorSensor1 = hardwareMap.get(ColorSensor.class, "colorSensor1");
+            colorSensor2 = hardwareMap.get(ColorSensor.class, "colorSensor2");
+            colorSensor3 = hardwareMap.get(ColorSensor.class, "colorSensor3");
 
-            // Set all servos to initial position at initialization
             transfer1.setPosition(POS_INITIAL);
             transfer2.setPosition(POS_INITIAL);
             transfer3.setPosition(POS_INITIAL);
         }
 
+        private BallColor getColorOfSensor(int sensorId) {
+            ColorSensor sensor;
+            switch (sensorId) {
+                case 1: sensor = colorSensor1; break;
+                case 2: sensor = colorSensor2; break;
+                case 3: sensor = colorSensor3; break;
+                default: return BallColor.NONE;
+            }
+
+            final double PRESENCE_THRESHOLD = 100;
+            if (sensor.alpha() < PRESENCE_THRESHOLD) {
+                return BallColor.NONE;
+            }
+
+            double greenValue = Math.max(1, sensor.green());
+            double redValue = Math.max(1, sensor.red());
+            double blueValue = Math.max(1, sensor.blue());
+
+            final double GREEN_RATIO_THRESHOLD = 1.3;
+            final double PURPLE_RATIO_THRESHOLD = 1.2;
+
+            boolean isGreen = greenValue / redValue > GREEN_RATIO_THRESHOLD && greenValue / blueValue > GREEN_RATIO_THRESHOLD;
+            boolean isPurple = redValue / greenValue > PURPLE_RATIO_THRESHOLD && blueValue / greenValue > PURPLE_RATIO_THRESHOLD;
+
+            if (isGreen) {
+                return BallColor.GREEN;
+            } else if (isPurple) {
+                return BallColor.PURPLE;
+            } else {
+                return BallColor.PURPLE;
+            }
+        }
 
         public class DoTransfer implements Action {
             private final ElapsedTime timer = new ElapsedTime();
-
             private final int[] sequence;
             private int currentStep = 0;
             private boolean isWaiting = false;
 
-            public DoTransfer(int sequenceId) {
-                switch (sequenceId) {
-                    case 1:
-                        this.sequence = new int[]{1, 2, 3};
-                        break;
-                    case 2:
-                        this.sequence = new int[]{2, 1, 3};
-                        break;
-                    case 3:
-                        this.sequence = new int[]{3, 1, 2};
-                        break;
-                    default:
+            public DoTransfer(BallColor[] shootingOrder) {
+                HashMap<Integer, BallColor> detectedColors = new HashMap<>();
+                detectedColors.put(1, getColorOfSensor(1));
+                detectedColors.put(2, getColorOfSensor(2));
+                detectedColors.put(3, getColorOfSensor(3));
 
-                        this.sequence = new int[]{1, 2, 3};
-                        break;
+                List<Integer> builtSequence = new ArrayList<>();
+                List<Integer> availablePositions = new ArrayList<>(Arrays.asList(1, 2, 3));
+
+                for (BallColor desiredColor : shootingOrder) {
+                    Integer foundPosition = null;
+                    for (Integer position : availablePositions) {
+                        if (detectedColors.get(position) == desiredColor) {
+                            foundPosition = position;
+                            break;
+                        }
+                    }
+                    if (foundPosition != null) {
+                        builtSequence.add(foundPosition);
+                        availablePositions.remove(foundPosition);
+                    }
                 }
+                builtSequence.addAll(availablePositions);
+
+                this.sequence = builtSequence.stream().mapToInt(i->i).toArray();
             }
 
             private Servo getServo(int id) {
@@ -117,10 +168,11 @@ public class AutomationsActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (currentStep >= sequence.length * 2) {
 
+                if (currentStep >= sequence.length) {
                     return false;
                 }
+
 
                 if (isWaiting) {
                     if (timer.seconds() >= WAIT_TIME) {
@@ -131,34 +183,23 @@ public class AutomationsActions {
                 }
 
 
-                int servoIndex = currentStep / 2;
-                int servoId = sequence[servoIndex];
+                int servoId = sequence[currentStep];
                 Servo currentServo = getServo(servoId);
 
-                if (currentStep % 2 == 0) {
-
-                    if (currentServo != null) currentServo.setPosition(POS_ACTIVE);
-                    timer.reset();
-                    isWaiting = true;
-                } else {
-
-                    if (currentServo != null) currentServo.setPosition(POS_INITIAL);
-                    timer.reset();
-                    isWaiting = true;
+                if (currentServo != null) {
+                    currentServo.setPosition(POS_ACTIVE);
                 }
+
+
+                timer.reset();
+                isWaiting = true;
 
                 return true;
             }
         }
 
-        /**
-         * Use this to get an instance of the DoTransfer action.
-         * @param sequenceId The order of shooting (1, 2, or 3). ]<br>if 1: 1st servo, 2nd servo, 3rd servo<br>if 2: 2nd servo, 1st servo, 3rd servo<br>if 3: 3rd servo, 1st servo, 2nd servo
-         * @return The Action object ready to be run.
-         * @implNote <br>to run, use Actions.runBlocking(transfer.doTransfer(<strong>SEQUENCE ID HERE</strong>));
-         */
-        public Action doTransfer(int sequenceId) {
-            return new DoTransfer(sequenceId);
+        public Action doTransfer(BallColor[] shootingOrder) {
+            return new DoTransfer(shootingOrder);
         }
     }
     public class HuskyLens {
@@ -167,34 +208,34 @@ public class AutomationsActions {
         private final String Alliance;
         private final MecanumDrive Drive;
 
-
         public HuskyLens(HuskyLensCam cam, MecanumDrive drive, String alliance) {
             Cam = cam;
             if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")){
-                throw new IllegalArgumentException("Invalid alliance: " + alliance+ "\n use red or blue");
+                throw new IllegalArgumentException("Invalid alliance: " + alliance+ "\nuse red or blue");
             }
             Alliance = alliance.toLowerCase();
             Drive = drive;
         }
 
         public BallColor[] getShootingOrder() {
-            BallColor[] ShootingOrder = null;
-            ObjectInfo tag;
-            tag = Cam.scanTag().get(0);
-            if (tag.objectID == 1){
-                ShootingOrder = new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
-
+            List<ObjectInfo> tags = Cam.scanTag();
+            if (tags == null || tags.isEmpty()) {
+                // Default order if no tags are seen
+                return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.PURPLE};
             }
-            else if (tag.objectID == 2){
-                ShootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE};
+
+            ObjectInfo tag = tags.get(0);
+            switch (tag.objectID) {
+                case 1:
+                    return new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
+                case 2:
+                    return new BallColor[]{BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE};
+                case 3:
+                    return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN};
+                default:
+                    // Default order for any other tag ID
+                    return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.PURPLE};
             }
-            else if (tag.objectID == 3){
-                ShootingOrder = new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN};
-            }
-            return ShootingOrder;
-
-
-
         }
         public class AutoAlignGoal implements Action {
             private boolean initialized = false;
@@ -205,7 +246,6 @@ public class AutomationsActions {
                 if (!initialized) {
                     if (Objects.equals(Alliance, "red")) {
                         for (ObjectInfo o : Cam.scanTag()) {
-                            // TODO: Get real tag id for red
                             if (Objects.equals(o.objectID, 1)) {
                                 goalTag = o;
                                 packet.put("tag ObjectInfo: ", goalTag.toString());
@@ -214,7 +254,6 @@ public class AutomationsActions {
                         }
                     } else {
                         for (ObjectInfo o : Cam.scanTag()) {
-                            // TODO: Get real tag id for blue
                             if (Objects.equals(o.objectID, 2)) {
                                 goalTag = o;
                                 break;
@@ -222,20 +261,15 @@ public class AutomationsActions {
                         }
                     }
 
-
-
-
                     if (goalTag != null) {
                         Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
                         packet.put("targetPose: ", targetPose.toString());
                         packet.put("currentPose: ", Drive.localizer.getPose().toString());
-                        Drive.localizer.update();
                         trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                                .strafeToLinearHeading(new Vector2d(Drive.localizer.getPose().position.x-0.1, Drive.localizer.getPose().position.y), targetPose.heading)
+                                .turnTo(targetPose.heading)
                                 .build();
                     }
                     initialized = true;
-
                 }
                 if (trajectoryAction != null) {
                     return trajectoryAction.run(packet);
@@ -246,7 +280,6 @@ public class AutomationsActions {
         public Action autoAlignGoal() {
             return new AutoAlignGoal();
         }
-
     }
     public class HuskyLensServo{
         private final Servo hlServo;
@@ -266,7 +299,6 @@ public class AutomationsActions {
                 return false;
             }
         }
-        //TODO: create LookLeft
         public class LookForward implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -297,5 +329,4 @@ public class AutomationsActions {
         public Action lookForward() {return new LookForward();}
         public Action lookBack() {return new LookBack();}
     }
-
-    }
+}

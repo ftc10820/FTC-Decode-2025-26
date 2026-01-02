@@ -4,6 +4,7 @@ import static android.os.SystemClock.sleep;
 import static java.lang.Math.tan;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -178,11 +179,38 @@ public class HuskyLensCam {
         allObjects.addAll(scanTag());
         return allObjects;
     }
-    public Pose2d getPoseOf(Pose2d currentPose, ObjectInfo object){
-        //TODO: test and verify that the pose functionality is working as expected
-        return new Pose2d(currentPose.position.x-(object.distance*CM_TO_IN),currentPose.position.y-(object.lateralDistance*CM_TO_IN),(currentPose.heading.log()-Math.toRadians(object.yaw)));
+    public Pose2d getPoseOf(Pose2d currentPose, ObjectInfo object) {
+        double objectYawRad = Math.toRadians(object.yaw);
 
+
+        double forwardDistanceCm = object.distance * Math.cos(objectYawRad);
+
+        double lateralDistanceCm = object.lateralDistance;
+
+        double forwardDistanceIn = forwardDistanceCm * CM_TO_IN;
+        double lateralDistanceIn = lateralDistanceCm * CM_TO_IN;
+
+
+        double robotRelativeX = forwardDistanceIn;
+        double robotRelativeY = -lateralDistanceIn;
+
+
+        double robotHeadingRad = currentPose.heading.log();
+
+
+        double fieldOffsetX = robotRelativeX * Math.cos(robotHeadingRad) - robotRelativeY * Math.sin(robotHeadingRad);
+        double fieldOffsetY = robotRelativeX * Math.sin(robotHeadingRad) + robotRelativeY * Math.cos(robotHeadingRad);
+
+
+        double objectFieldX = currentPose.position.x + fieldOffsetX;
+        double objectFieldY = currentPose.position.y + fieldOffsetY;
+
+        double headingToObject = Math.atan2(fieldOffsetY, fieldOffsetX);
+
+        return new Pose2d(new Vector2d(objectFieldX, objectFieldY), headingToObject);
     }
+
+
     // === Auto Tuning (Downward Tilt Negative) ===
     public double autoTuneFocalLength(LinearOpMode opMode,
                                       double knownDistanceCm,

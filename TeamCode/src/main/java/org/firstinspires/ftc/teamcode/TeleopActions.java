@@ -148,9 +148,9 @@ public class TeleopActions extends LinearOpMode {
             if (gamepad2.y){
                 flywheelPower = 1;
             }
-            if (gamepad2.right_bumper){
-                Actions.runBlocking(transfer.doTransfer(1));
-                }
+//            if (gamepad2.right_bumper){
+//                Actions.runBlocking(transfer.doTransfer(1));
+//                }
 
             //transfer.setPosition(transferPosition);
            flywheel.setPower(flywheelPower);
