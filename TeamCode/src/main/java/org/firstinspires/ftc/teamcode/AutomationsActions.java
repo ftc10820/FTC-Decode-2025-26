@@ -93,7 +93,7 @@ public class AutomationsActions {
             transfer3.setPosition(POS_INITIAL);
         }
 
-        private BallColor getColorOfSensor(int sensorId) {
+        public BallColor getColorOfSensor(int sensorId) {
             ColorSensor sensor;
             switch (sensorId) {
                 case 1: sensor = colorSensor1; break;
