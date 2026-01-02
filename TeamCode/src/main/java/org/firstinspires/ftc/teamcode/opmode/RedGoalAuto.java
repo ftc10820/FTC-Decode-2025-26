@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
@@ -43,7 +44,7 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(30)
+                .lineToX(30,new TranslationalVelConstraint(15.0))
                 .build();
 
         waitForStart();
