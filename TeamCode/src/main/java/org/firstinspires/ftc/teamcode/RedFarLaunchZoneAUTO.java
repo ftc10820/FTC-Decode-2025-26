@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode;
 
 // RR-specific imports
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -16,6 +18,8 @@ import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import java.util.Arrays;
 
 
 @Autonomous(name = "Red Far Launch Zone Autonomous", group = "Autonomous")
@@ -82,30 +86,39 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        waitForStart();
-
         // Set initial position for starting the match (Red Far Launch Zone)
         Pose2d initialPose = new Pose2d(-63,-24,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
+        // Automation Actions and HuskyLens
+        AutomationsActions actions = new AutomationsActions();
+        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
+
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 300, 20, -10,0);
+
+        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
+        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
+        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
+
+        waitForStart();
+
         // Set flywheel motor powers to run constant
-        flywheel.setPower(1);
+        // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(12,-24),0)
+                .splineTo(new Vector2d(12,12), Math.toRadians(45))
                 .build();
         Actions.runBlocking(tab1);
+        AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
+        telemetry.update();
 
         // TODO: Read obelisk to get the motif
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp()), hlServo.lookRight()));
+        Actions.runBlocking(transfer.doTransfer(shootingOrder));
 
-        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),0))
-                .splineTo(new Vector2d(12,-24),45)
-                .build();
-        Actions.runBlocking(tab2);
-
-        // TODO: Shoot preloads to score points
-
-        intake.setPower(1);
+        /* intake.setPower(1);
 
         Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
                 .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15)))
@@ -126,7 +139,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Actions.runBlocking(tab5);
 
         // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
-        // TODO: Control whether tabs 6 and 7 could happen
+        // TODO: Control whether tabs 5 and 6 could happen
 
         Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3))))
                 .splineTo(new Vector2d(12,-24), 45)
@@ -139,5 +152,5 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 .splineTo(new Vector2d(-24,-24), 0)
                 .build();
         Actions.runBlocking(tab7);
-
+*/
 }}

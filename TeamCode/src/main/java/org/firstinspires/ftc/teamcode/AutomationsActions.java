@@ -301,6 +301,19 @@ public class AutomationsActions {
                 return false;
             }
         }
+        public class LookLeft implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_LEFT);
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                packet.put("hlServo pos",hlServo.getPosition());
+                return false;
+            }
+        }
         public class LookForward implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -328,6 +341,7 @@ public class AutomationsActions {
             }
         }
         public Action lookRight() {return new LookRight();}
+        public Action lookLeft() {return new LookLeft();}
         public Action lookForward() {return new LookForward();}
         public Action lookBack() {return new LookBack();}
     }
