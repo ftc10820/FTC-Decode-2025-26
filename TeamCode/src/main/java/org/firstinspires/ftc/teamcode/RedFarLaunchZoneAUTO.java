@@ -87,7 +87,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Set initial position for starting the match (Red Far Launch Zone)
-        Pose2d initialPose = new Pose2d(-63,-24,0);
+        Pose2d initialPose = new Pose2d(-63,-18,0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // Automation Actions and HuskyLens
