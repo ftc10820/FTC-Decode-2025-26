@@ -35,7 +35,7 @@ public class AutomationsActions {
     public class Shooter {
         private final DcMotorEx motor;
         public final double TICKS_PER_REV = 28;
-        public final double FLYWHEEL_RPM = 2000;
+        public final double FLYWHEEL_RPM = 2500;
         public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
 
         public Shooter(HardwareMap hardwareMap) {

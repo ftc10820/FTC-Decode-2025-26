@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
@@ -48,9 +49,7 @@ public class RedGoalAuto extends LinearOpMode {
         waitForStart();
 
         if (isStopRequested()) return;
-
-    
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp()), hlServo.lookRight()));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,new SequentialAction(shooter.spinUp(), new SleepAction(1.5))), hlServo.lookRight()));
 
        
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
