@@ -87,7 +87,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Set initial position for starting the match (Red Far Launch Zone)
-        Pose2d initialPose = new Pose2d(18,-63,0);
+        Pose2d initialPose = new Pose2d(-63,-18, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // Automation Actions and HuskyLens
@@ -107,7 +107,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(12,12), Math.toRadians(45))
+                .splineTo(new Vector2d(18,-18), Math.toRadians(-135))
                 .build();
         Actions.runBlocking(tab1);
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
