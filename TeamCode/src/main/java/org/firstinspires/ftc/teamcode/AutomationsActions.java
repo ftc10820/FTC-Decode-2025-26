@@ -111,11 +111,8 @@ public class AutomationsActions {
             double redValue = Math.max(1, sensor.red());
             double blueValue = Math.max(1, sensor.blue());
 
-            final double GREEN_RATIO_THRESHOLD = 1.3;
-            final double PURPLE_RATIO_THRESHOLD = 1.2;
-
-            boolean isGreen = greenValue / redValue > GREEN_RATIO_THRESHOLD && greenValue / blueValue > GREEN_RATIO_THRESHOLD;
-            boolean isPurple = redValue / greenValue > PURPLE_RATIO_THRESHOLD && blueValue / greenValue > PURPLE_RATIO_THRESHOLD;
+            boolean isGreen = greenValue>redValue && redValue>blueValue && greenValue>100;
+            boolean isPurple = blueValue>redValue && redValue>greenValue && blueValue>100;
 
             if (isGreen) {
                 return BallColor.GREEN;
