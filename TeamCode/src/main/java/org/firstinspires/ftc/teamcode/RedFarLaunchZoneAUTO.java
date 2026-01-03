@@ -110,10 +110,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(24,-24), Math.toRadians(135),new MinVelConstraint(Arrays.asList(
-                        new TranslationalVelConstraint(30),
-                        new AngularVelConstraint(Math.toRadians(20))
-                )))
+                .splineTo(new Vector2d(24,-24), Math.toRadians(135))
                 .build();
         Actions.runBlocking(new SequentialAction(
                 tab1,
