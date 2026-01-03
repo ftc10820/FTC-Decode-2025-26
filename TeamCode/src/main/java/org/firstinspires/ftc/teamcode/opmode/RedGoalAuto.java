@@ -34,7 +34,7 @@ public class RedGoalAuto extends LinearOpMode {
         HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
 
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 300, 20, -10,0);
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);

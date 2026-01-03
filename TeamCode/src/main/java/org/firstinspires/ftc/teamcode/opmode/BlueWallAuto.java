@@ -34,7 +34,7 @@ public class BlueWallAuto extends LinearOpMode {
         HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
         // Camera mounted 25 cm high, tilted downward 15°
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 200.0, 200, 33.02, 19.5);
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
 
         Shooter shooter = new Shooter(hardwareMap);
 
