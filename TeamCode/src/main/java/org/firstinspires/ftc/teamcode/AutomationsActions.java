@@ -11,10 +11,12 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
@@ -102,17 +104,18 @@ public class AutomationsActions {
                 default: return BallColor.NONE;
             }
 
-            final double PRESENCE_THRESHOLD = 100;
-            if (sensor.alpha() < PRESENCE_THRESHOLD) {
+
+            if (((DistanceSensor) sensor).getDistance(DistanceUnit.CM) > 3.47) {
                 return BallColor.NONE;
             }
+
 
             double greenValue = Math.max(1, sensor.green());
             double redValue = Math.max(1, sensor.red());
             double blueValue = Math.max(1, sensor.blue());
 
-            boolean isGreen = greenValue>redValue && redValue>blueValue && greenValue>100;
-            boolean isPurple = blueValue>redValue && redValue>greenValue && blueValue>100;
+            boolean isGreen = greenValue>redValue && greenValue>blueValue && greenValue>100;
+            boolean isPurple = blueValue>redValue && blueValue>greenValue && blueValue>100;
 
             if (isGreen) {
                 return BallColor.GREEN;
