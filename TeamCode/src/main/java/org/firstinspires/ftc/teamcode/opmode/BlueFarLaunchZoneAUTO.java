@@ -125,7 +125,6 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
         Actions.runBlocking(transfer.doTransfer(shootingOrder));
         sleep(10000);
         while(opModeIsActive()) {
