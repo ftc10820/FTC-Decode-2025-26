@@ -1,13 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 // RR-specific imports
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -16,6 +13,8 @@ import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -25,8 +24,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import java.util.Arrays;
 
 
-@Autonomous(name = "Red Far Launch Zone Autonomous", group = "Autonomous")
-public class RedFarLaunchZoneAUTO extends LinearOpMode {
+@Autonomous(name = "Blue Far Launch Zone Autonomous", group = "Autonomous")
+public class BlueFarLaunchZoneAUTO extends LinearOpMode {
     public void initialize() {
 
         // Drivetrain motors
@@ -90,7 +89,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Set initial position for starting the match (Red Far Launch Zone)
-        Pose2d initialPose = new Pose2d(-63,-18, 0);
+        Pose2d initialPose = new Pose2d(-63,18, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         // Automation Actions and HuskyLens
@@ -110,7 +109,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(24,-24), Math.toRadians(135))
+                .splineTo(new Vector2d(24,24), Math.toRadians(-135))
                 .build();
         Actions.runBlocking(new SequentialAction(
                 tab1,
@@ -157,4 +156,4 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 .build();
         Actions.runBlocking(tab7);
 */
-}}
+    }}

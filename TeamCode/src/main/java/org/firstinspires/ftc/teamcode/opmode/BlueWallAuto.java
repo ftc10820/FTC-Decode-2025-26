@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 // Non-RR imports
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
         import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -18,7 +19,7 @@ import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
 import java.util.List;
-
+@Disabled
 @Config
 @Autonomous(name = "BLUE_WALL_AUTO", group = "Autonomous")
 public class BlueWallAuto extends LinearOpMode {
