@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -114,12 +115,22 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(
                 tab1,
                 hlServo.lookRight()));
+
+        if (isStopRequested()) return;
+        Actions.runBlocking(new SequentialAction(tab1,hlServo.lookRight(),new SleepAction(1)));
+
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        sleep(500);
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
         Actions.runBlocking(transfer.doTransfer(shootingOrder));
+        sleep(10000);
+        while(opModeIsActive()) {
+            sleep(50);
+        }
 
         /* intake.setPower(1);
 
