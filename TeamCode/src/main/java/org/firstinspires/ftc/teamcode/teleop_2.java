@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -85,7 +86,9 @@ public class teleop_2 extends LinearOpMode {
         }
         try{
             AutomationsActions actions = new AutomationsActions();
-            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),200,200,20,2),new MecanumDrive(hardwareMap,new Pose2d(0,0,0)),"red");
+            drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
+            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
+            transferControl = actions.new Transfer(hardwareMap);
             isUseCam = true;
             telemetry.addData("Debug", "cam detected, proceeding with");
 
@@ -157,10 +160,12 @@ public class teleop_2 extends LinearOpMode {
     public DcMotor backLeft;
     public DcMotorEx flywheel;
     public DcMotor backRight;
+    MecanumDrive drive;
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
     public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.Transfer transferControl;
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
@@ -180,6 +185,7 @@ public class teleop_2 extends LinearOpMode {
     ElapsedTime eTime2 = new ElapsedTime();
 
     ElapsedTime eTeleOp = new ElapsedTime();
+    AutomationsActions.BallColor[] shootingOrder;
 
     double speedFactor = 0.8;
 
@@ -193,10 +199,7 @@ public class teleop_2 extends LinearOpMode {
         eTeleOp.reset();
         double intakePower =0;
         double flywheelPower = 0;
-        double transferPosition = 1;
-        if (useTransfer) {
-            transfer.setPosition(transferPosition);
-        }
+
         while (opModeIsActive()) {
             if (useColorSensor){
             telemetry.addData("color sensor 1 color (rgb)",colorSensor1.red()+" "+colorSensor1.green()+" "+colorSensor1.blue());
@@ -240,26 +243,31 @@ public class teleop_2 extends LinearOpMode {
             if (gamepad2.y){
                 flywheelPower = 1;
             }
-            if (gamepad2.right_bumper){
-
-
-                    telemetry.addData("debug","position 0");
-
-                    transferPosition = 0;
-                } else if (gamepad2.left_bumper) {
-                    telemetry.addData("debug","position 1");
-
-                    transferPosition = 0.45;
-
-
+//            if (gamepad2.right_bumper){
+//                Actions.runBlocking(transferControl.doTransfer(shootingOrder));
+//                telemetry.addData("debug","transfering in order: "+ Arrays.toString(shootingOrder));
+//                telemetry.update();
+//                sleep(4000);
+//                transfer.setPosition(0.45);
+//                transfer2.setPosition(0.45);
+//                transfer3.setPosition(0.45);
+//                }
+            if (gamepad2.dpad_left){
+                transfer.setPosition(0);
+            }
+            if (gamepad2.dpad_up){
+                transfer2.setPosition(0);
+            }
+            if (gamepad2.dpad_right){
+                transfer3.setPosition(0);
+            }
+            if (gamepad2.dpad_down){
+                transfer.setPosition(0.45);
+                transfer2.setPosition(0.45);
+                transfer3.setPosition(0.45);
             }
 
-            if (useTransfer){
-                transfer.setPosition(transferPosition);
-                transfer2.setPosition(transferPosition);
-                transfer3.setPosition(transferPosition);
 
-            }
 
             if (useFlywheel){
                 if (gamepad2.y){
@@ -284,6 +292,15 @@ public class teleop_2 extends LinearOpMode {
 
                     }
                 }
+                if (gamepad1.y){
+                    shootingOrder = camControl.getShootingOrder();
+                }
+            }
+            if (gamepad2.right_bumper){
+                transfer.setPosition(.13);
+                transfer2.setPosition(.13);
+                transfer3.setPosition(.13);
+                flywheel.setPower(-0.15);
             }
             if (useDrivetrain) {
                 frontLeft.setPower(speedFactor * (frontLeftPower));

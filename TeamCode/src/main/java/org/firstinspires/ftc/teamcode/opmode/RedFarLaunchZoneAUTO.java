@@ -111,6 +111,10 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Action tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(24,-24), Math.toRadians(135))
                 .build();
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .splineTo(new Vector2d(-24,0),0)
+                .build();
         Actions.runBlocking(new SequentialAction(
                 tab1,
                 hlServo.lookRight()));
@@ -119,7 +123,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(transfer.doTransfer(shootingOrder));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
 
         /* intake.setPower(1);
 

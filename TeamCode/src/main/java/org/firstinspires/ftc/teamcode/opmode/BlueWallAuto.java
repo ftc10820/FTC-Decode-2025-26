@@ -42,6 +42,10 @@ public class BlueWallAuto extends LinearOpMode {
         Action tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(0, 0), Math.toRadians(0))
                 .build();
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .splineTo(new Vector2d(-24,0),0)
+                .build();
         Actions.runBlocking(tab1);
         //  Look at obelisk
         List<ObjectInfo> tags = cam.scanTag();

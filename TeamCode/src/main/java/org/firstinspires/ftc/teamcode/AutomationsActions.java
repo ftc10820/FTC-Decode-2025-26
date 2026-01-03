@@ -251,7 +251,7 @@ public class AutomationsActions {
                 if (!initialized) {
                     if (Objects.equals(Alliance, "red")) {
                         for (ObjectInfo o : Cam.scanTag()) {
-                            if (Objects.equals(o.objectID, 1)) {
+                            if (Objects.equals(o.objectID, 5)) {
                                 goalTag = o;
                                 packet.put("tag ObjectInfo: ", goalTag.toString());
                                 break;

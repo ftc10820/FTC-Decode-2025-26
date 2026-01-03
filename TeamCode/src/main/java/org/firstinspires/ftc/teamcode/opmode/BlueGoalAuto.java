@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TranslationalVelConstraint;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
@@ -45,7 +46,10 @@ public class BlueGoalAuto extends LinearOpMode {
         Action tab1 = drive.actionBuilder(initialPose)
                 .lineToX(-30)
                 .build();
-
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .splineTo(new Vector2d(-24,0),0)
+                .build();
         waitForStart();
 
         if (isStopRequested()) return;
@@ -59,7 +63,7 @@ public class BlueGoalAuto extends LinearOpMode {
         telemetry.update();
 
 
-        Actions.runBlocking(transfer.doTransfer(shootingOrder));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
         sleep(10000);
         while(opModeIsActive()) {
             sleep(50);
