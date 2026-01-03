@@ -44,16 +44,18 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(30,new TranslationalVelConstraint(15.0))
+                .lineToX(30)
                 .build();
 
         waitForStart();
 
         if (isStopRequested()) return;
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,new SequentialAction(shooter.spinUp(), new SleepAction(1.5))), hlServo.lookRight()));
+        Actions.runBlocking(new SequentialAction(tab1,hlServo.lookRight(),new SleepAction(1)));
 
        
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        sleep(500);
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
