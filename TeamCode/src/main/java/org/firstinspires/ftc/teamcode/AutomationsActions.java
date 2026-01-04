@@ -47,25 +47,34 @@ public class AutomationsActions {
 
         public class SpinUp implements Action {
             private boolean initialized = false;
+            private final double targetVelocity;
+
+            public SpinUp(double rpm) {
+                this.targetVelocity = TICKS_PER_REV * rpm / 60.0;
+            }
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
                     motor.setDirection(DcMotorEx.Direction.REVERSE);
                     motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                    motor.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                    motor.setVelocity(targetVelocity);
                     initialized = true;
                 }
 
                 double vel = motor.getVelocity();
-                packet.put("shooterVelocity goal",-FLYWHEEL_TICKS_PER_REV);
+                packet.put("shooterVelocity goal", -targetVelocity);
                 packet.put("shooterVelocity", vel);
-                return (vel < FLYWHEEL_TICKS_PER_REV);
+                return (vel < targetVelocity);
             }
         }
 
+        public Action spinUp(double rpm) {
+            return new SpinUp(rpm);
+        }
+
         public Action spinUp() {
-            return new SpinUp();
+            return new SpinUp(FLYWHEEL_RPM);
         }
 
     }
@@ -216,7 +225,7 @@ public class AutomationsActions {
         public HuskyLens(HuskyLensCam cam, MecanumDrive drive, String alliance) {
             Cam = cam;
             if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")){
-                throw new IllegalArgumentException("Invalid alliance: " + alliance+ "\nuse red or blue");
+                throw new IllegalArgumentException("Invalid alliance: " + alliance+ " use red or blue");
             }
             Alliance = alliance.toLowerCase();
             Drive = drive;
