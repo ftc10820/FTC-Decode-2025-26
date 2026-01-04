@@ -109,21 +109,19 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(24,24), Math.toRadians(-135))
+                .splineTo(new Vector2d(20,20), Math.toRadians(-135))
                 .build();
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .splineTo(new Vector2d(-24,0),0)
-                .build();
+
         Actions.runBlocking(new SequentialAction(
                 tab1,
-                hlServo.lookRight()));
+                hlServo.lookLeft()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
         /* intake.setPower(1);
 

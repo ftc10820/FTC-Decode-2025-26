@@ -45,12 +45,10 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(30)
+                .lineToX(20)
                 .build();
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                        .splineTo(new Vector2d(-24,0),0)
-                        .build();
+
 
         waitForStart();
 
@@ -65,9 +63,7 @@ public class RedGoalAuto extends LinearOpMode {
         telemetry.update();
 
      
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
-
-        sleep(10000);
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
         while(opModeIsActive()) {
             sleep(50);
         }

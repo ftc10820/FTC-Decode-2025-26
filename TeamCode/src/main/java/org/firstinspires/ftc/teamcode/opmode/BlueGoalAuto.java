@@ -44,16 +44,14 @@ public class BlueGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(-30)
+                .lineToX(20)
                 .build();
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .splineTo(new Vector2d(-24,0),0)
-                .build();
+
         waitForStart();
 
         if (isStopRequested()) return;
-        Actions.runBlocking(new SequentialAction(tab1,hlServo.lookRight(),new SleepAction(1)));
+        Actions.runBlocking(new SequentialAction(tab1,hlServo.lookLeft(),new SleepAction(1)));
 
 
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
@@ -63,8 +61,7 @@ public class BlueGoalAuto extends LinearOpMode {
         telemetry.update();
 
 
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
-        sleep(10000);
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
         while(opModeIsActive()) {
             sleep(50);
         }

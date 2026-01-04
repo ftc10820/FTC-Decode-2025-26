@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
@@ -109,13 +110,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // flywheel.setPower(1);
 
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(24,-24), Math.toRadians(135))
+                .splineTo(new Vector2d(20,-20), Math.toRadians(135))
                 .build();
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .splineTo(new Vector2d(-24,0),0)
-                .build();
+
         Actions.runBlocking(new SequentialAction(
+
                 tab1,
                 hlServo.lookRight()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
@@ -123,7 +123,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder),tab2));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
         /* intake.setPower(1);
 
@@ -132,7 +132,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 .build();
         Actions.runBlocking(tab3);
 
-        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15))))
+        Action tab4 = drive.actionBu8ilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15))))
                 .splineTo(new Vector2d(12,-24),45)
                 .build();
         Actions.runBlocking(tab4);

@@ -228,14 +228,14 @@ public class teleop_2 extends LinearOpMode {
 
             driveMethod();
 
-            if (gamepad2.b && gamepad2.x) {
-                intakePower = 0;
-            }
+
             // These conditions change the state, which will persist.
-            else if (gamepad2.b) {
-                intakePower = 1;  // Run forward
-            } else if (gamepad2.x) {
-                intakePower = -1; // Run backward
+            if (gamepad1.x) {
+                intakePower = -0.8;  // Run forward
+            } else if (gamepad1.b) {
+                intakePower = 0.8; // Run backward
+            } else if (gamepad1.y){
+                intakePower = 0;
             }
             if (gamepad2.a){
                 flywheelPower = 0;
