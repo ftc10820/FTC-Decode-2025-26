@@ -115,7 +115,6 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         drive.localizer.update();
 
         Actions.runBlocking(new SequentialAction(
-
                 tab1,
                 hlServo.lookRight()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();

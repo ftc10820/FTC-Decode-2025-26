@@ -100,7 +100,7 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
+        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "blue");
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
         waitForStart();
