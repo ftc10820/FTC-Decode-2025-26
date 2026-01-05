@@ -6,12 +6,12 @@ public class ObjectInfo {
     int x;
     int y;
     public int objectID;
-    String objectType;
-    double distance;
-    double yaw;
-    double pitch;
-    double realHeight; // Calculated real-world height
-    double lateralDistance; // Calculated lateral distance
+    public String objectType;
+    public double distance;
+    public double yaw;
+    public double pitch;
+    public double realHeight; // Calculated real-world height
+    public double lateralDistance; // Calculated lateral distance
     LocalTime timestamp;
 
     public ObjectInfo(int x, int y, String objectType, int objectID, double distance,double lateralDistance,double yaw, double pitch, double realHeight, LocalTime timestamp) {

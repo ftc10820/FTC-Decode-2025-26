@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;
@@ -87,6 +88,8 @@ public class AutomationsTest extends LinearOpMode {
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
             camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
             transferControl = actions.new Transfer(hardwareMap);
+            shooterControl = actions.new Shooter(hardwareMap);
+
             isUseCam = true;
             telemetry.addData("Debug", "cam detected, proceeding with");
 
@@ -164,6 +167,7 @@ public class AutomationsTest extends LinearOpMode {
     public ColorSensor colorSensor3;
     public AutomationsActions.HuskyLens camControl;
     public AutomationsActions.Transfer transferControl;
+    public AutomationsActions.Shooter shooterControl;
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
@@ -285,7 +289,8 @@ public class AutomationsTest extends LinearOpMode {
 
             if (useFlywheel){
                 if (gamepad2.y){
-                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                    ObjectInfo target =camControl.Cam.scanTag().get(0);
+                    shooterControl.spinUp(shooterControl.getRPMFromDistance(target.distance,target.realHeight));
                 }
                 if (gamepad2.a){
                     flywheel.setPower(0);

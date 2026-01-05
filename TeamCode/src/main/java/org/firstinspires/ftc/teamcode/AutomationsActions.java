@@ -69,6 +69,36 @@ public class AutomationsActions {
             }
         }
 
+        public double getRPMFromDistance(double distanceInCm, double targetHeightInCm) {
+            double R = distanceInCm / 100.0; // Distance (m)
+            final double g = 9.81;
+
+            double r_cm = DecodeConstants.FLYWHEEL_RADIUS_CM;
+            double r = r_cm / 100.0; // Flywheel Radius (m)
+
+            double theta_deg = DecodeConstants.LAUNCH_ANGLE_DEGREES;
+            double theta = Math.toRadians(theta_deg); // Launch Angle (rad)
+
+            double eta = DecodeConstants.SHOOTER_EFFICIENCY;
+
+            double yt = targetHeightInCm / 100.0; // Target Height (m)
+
+            double y0_cm = DecodeConstants.LAUNCH_HEIGHT_CM;
+            double y0 = y0_cm / 100.0; // Launch Height (m)
+
+            // RPM = (60 / (pi * r * eta)) * sqrt((g * R^2) / (2 * cos^2(theta) * (R * tan(theta) - (y_t - y_0))))
+            double term1 = 60.0 / (Math.PI * r * eta);
+            double cosTheta = Math.cos(theta);
+            double tanTheta = Math.tan(theta);
+
+            double numerator = g * R * R;
+            double denominator = 2 * cosTheta * cosTheta * (R * tanTheta - (yt - y0));
+
+            double sqrtTerm = Math.sqrt(numerator / denominator);
+
+            return term1 * sqrtTerm;
+        }
+
         public Action spinUp(double rpm) {
             return new SpinUp(rpm);
         }
@@ -217,7 +247,7 @@ public class AutomationsActions {
         }
     }
     public class HuskyLens {
-        private final HuskyLensCam Cam;
+        public final HuskyLensCam Cam;
         private ObjectInfo goalTag = null;
         private final String Alliance;
         private final MecanumDrive Drive;
