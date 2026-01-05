@@ -109,6 +109,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         // Set flywheel motor powers to run constant
         // flywheel.setPower(1);
 
+        // Code to set up and shoot the balls to score points in auto
         Action tab1 = drive.actionBuilder(initialPose)
                 .splineTo(new Vector2d(20,-20), Math.toRadians(135))
                 .build();
@@ -123,6 +124,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
         Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
+
+        // Code to leave the launch zone
+        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(20,20),Math.toRadians(-135)))
+                .splineTo(new Vector2d(-24,-24),Math.toRadians(90))
+                .build();
+        Actions.runBlocking(tab2);
 
         /* intake.setPower(1);
 
