@@ -289,8 +289,17 @@ public class AutomationsTest extends LinearOpMode {
 
             if (useFlywheel){
                 if (gamepad2.y){
-                    ObjectInfo target =camControl.Cam.scanTag().get(0);
-                    shooterControl.spinUp(shooterControl.getRPMFromDistance(target.distance,target.realHeight));
+                    try {
+                        ObjectInfo target = camControl.Cam.scanTag().get(0);
+                        telemetry.addData("cam", target.toString());
+                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, target.realHeight);
+                        telemetry.addData("shooter target rpm", targetRPM);
+
+                        shooterControl.spinUp(targetRPM);
+                    } catch (Exception e){
+                        telemetry.addData("cam","no tag detected");
+
+                    }
                 }
                 if (gamepad2.a){
                     flywheel.setPower(0);

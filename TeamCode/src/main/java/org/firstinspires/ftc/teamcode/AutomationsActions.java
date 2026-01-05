@@ -65,7 +65,7 @@ public class AutomationsActions {
                 double vel = motor.getVelocity();
                 packet.put("shooterVelocity goal", -targetVelocity);
                 packet.put("shooterVelocity", vel);
-                return (vel < targetVelocity);
+                return (Math.abs(vel) < Math.abs(targetVelocity));
             }
         }
 
