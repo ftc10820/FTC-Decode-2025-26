@@ -296,7 +296,7 @@ public class SingleDriverTeleOp extends LinearOpMode {
                     }
                 }
                 if (gamepad1.y) {
-                    if (gamepad1.dpad_right)
+                    if (gamepad1.dpad_left)
                         shootingOrder = camControl.getShootingOrder();
                 }
             }
