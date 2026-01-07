@@ -245,13 +245,9 @@ public class SingleDriverTeleOp extends LinearOpMode {
             // Controls for the flywheel
             if (useFlywheel) {
                 if (gamepad1.right_bumper) {
-                    if (gamepad1.dpad_right) {
-                        flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
-                    }
-                    if (gamepad1.right_bumper) {
-                        if (gamepad1.dpad_left) {
-                            flywheel.setPower(0);
-                        }
+                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                } else if (gamepad1.right_bumper && !gamepad1.rightBumperWasPressed()) {
+                    flywheel.setPower(0);
                     }
                 }
 
@@ -323,7 +319,5 @@ public class SingleDriverTeleOp extends LinearOpMode {
 
         }
     }
-}
-
 
 
