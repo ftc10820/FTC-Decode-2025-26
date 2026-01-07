@@ -187,7 +187,7 @@ public class teleop_2 extends LinearOpMode {
     ElapsedTime eTeleOp = new ElapsedTime();
     AutomationsActions.BallColor[] shootingOrder;
 
-    double speedFactor = 0.8;
+    double speedFactor = 0.5;
 
     public void runOpMode() throws InterruptedException {
         initialize();
