@@ -38,7 +38,7 @@ public class AutomationsActions {
         private final DcMotorEx motor;
         public final double TICKS_PER_REV = 28;
         public final double FLYWHEEL_RPM = 2500;
-        public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+
 
         public Shooter(HardwareMap hardwareMap) {
             motor = hardwareMap.get(DcMotorEx.class, "flywheel");
@@ -65,7 +65,8 @@ public class AutomationsActions {
                 double vel = motor.getVelocity();
                 packet.put("shooterVelocity goal", -targetVelocity);
                 packet.put("shooterVelocity", vel);
-                return (Math.abs(vel) < Math.abs(targetVelocity));
+
+                return (Math.abs(vel) < 0.95 * Math.abs(targetVelocity));
             }
         }
 

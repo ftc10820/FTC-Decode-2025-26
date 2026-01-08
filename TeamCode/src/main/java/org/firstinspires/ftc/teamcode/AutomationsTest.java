@@ -292,10 +292,10 @@ public class AutomationsTest extends LinearOpMode {
                     try {
                         ObjectInfo target = camControl.Cam.scanTag().get(0);
                         telemetry.addData("cam", target.toString());
-                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, target.realHeight);
+                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, target.realHeight-25);
                         telemetry.addData("shooter target rpm", targetRPM);
 
-                        shooterControl.spinUp(targetRPM);
+                        Actions.runBlocking(shooterControl.spinUp(targetRPM));
                     } catch (Exception e){
                         telemetry.addData("cam","no tag detected");
 

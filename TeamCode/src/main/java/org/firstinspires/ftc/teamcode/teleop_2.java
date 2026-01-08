@@ -89,6 +89,7 @@ public class teleop_2 extends LinearOpMode {
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
             camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
             transferControl = actions.new Transfer(hardwareMap);
+            hlServo = actions.new HuskyLensServo(hardwareMap);
             isUseCam = true;
             telemetry.addData("Debug", "cam detected, proceeding with");
 
@@ -166,6 +167,7 @@ public class teleop_2 extends LinearOpMode {
     public ColorSensor colorSensor3;
     public AutomationsActions.HuskyLens camControl;
     public AutomationsActions.Transfer transferControl;
+    public AutomationsActions.HuskyLensServo hlServo;
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
@@ -310,6 +312,15 @@ public class teleop_2 extends LinearOpMode {
             }
             telemetry.update();
 
+            if (gamepad1.startWasPressed()){
+                Actions.runBlocking(hlServo.lookForward());
+                sleep(1000);
+                Actions.runBlocking(hlServo.lookBack());
+                sleep(1000);
+                Actions.runBlocking(hlServo.lookLeft());
+                sleep(1000);
+                Actions.runBlocking(hlServo.lookRight());
+            }
         }
     }
 }
