@@ -233,22 +233,21 @@ public class SingleDriverTeleOp extends LinearOpMode {
             // Controls for intake
             if (gamepad1.x) {
                 intakePower = -0.8;  // Run forward
+            if (gamepad1.x && !gamepad1.xWasPressed())  {
+                intakePower = 0; // Stop intake
+            }
             } else if (gamepad1.b) {
                 intakePower = 0.8; // Run backward
-            } else if (gamepad1.y){
-                intakePower = 0;
+            } else if (gamepad1.b && !gamepad1.xWasPressed()) {
+                intakePower = 0; //Stop intake
             }
 
             // Controls for the flywheel
             if (useFlywheel) {
-                if (gamepad1.a) {
-                    if (gamepad1.dpad_right) {
-                        flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
-                    }
-                    if (gamepad1.a) {
-                        if (gamepad1.dpad_left) {
-                            flywheel.setPower(0);
-                        }
+                if (gamepad1.right_bumper) {
+                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                } else if (gamepad1.right_bumper && !gamepad1.rightBumperWasPressed()) {
+                    flywheel.setPower(0);
                     }
                 }
 
@@ -295,13 +294,14 @@ public class SingleDriverTeleOp extends LinearOpMode {
 
                     }
                 }
-                if (gamepad1.y){
-                    shootingOrder = camControl.getShootingOrder();
+                if (gamepad1.y) {
+                    if (gamepad1.dpad_left)
+                        shootingOrder = camControl.getShootingOrder();
                 }
             }
 
             // Code for human player putting artifacts in robot
-            if (gamepad1.right_bumper){
+            if (gamepad1.left_bumper){
                 transfer.setPosition(.13);
                 transfer2.setPosition(.13);
                 transfer3.setPosition(.13);
@@ -319,7 +319,5 @@ public class SingleDriverTeleOp extends LinearOpMode {
 
         }
     }
-}
-
 
 
