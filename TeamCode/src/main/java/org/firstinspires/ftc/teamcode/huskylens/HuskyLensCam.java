@@ -34,6 +34,7 @@ public class HuskyLensCam {
     // Camera mounting parameters
     private volatile double cameraHeightCm; // height from ground (cm)
     private volatile double cameraTiltDeg;  // downward = negative, upward = positive
+    private volatile double cameraLateralOffsetCm; // offset from robot center (cm), negative is left, positive is right
 
     private final ConcurrentHashMap<Integer, String> idToColor = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Double> widthOfGameElements = new ConcurrentHashMap<>();
@@ -51,6 +52,23 @@ public class HuskyLensCam {
                         int specimenScreenYLimit,
                         double cameraHeightCm,
                         double cameraTiltDeg) {
+        this(camera, focalPoint, specimenScreenYLimit, cameraHeightCm, cameraTiltDeg, 0.0);
+    }
+
+    /**
+     * @param camera HuskyLens instance
+     * @param focalPoint initial focal length (px)
+     * @param specimenScreenYLimit y limit for color detection
+     * @param cameraHeightCm camera height from ground (cm)
+     * @param cameraTiltDeg camera tilt (degrees, downward negative)
+     * @param cameraLateralOffsetCm camera lateral offset from robot center (cm), negative left, positive right
+     */
+    public HuskyLensCam(HuskyLens camera,
+                        double focalPoint,
+                        int specimenScreenYLimit,
+                        double cameraHeightCm,
+                        double cameraTiltDeg,
+                        double cameraLateralOffsetCm) {
         if (camera == null) {
             throw new NullPointerException("INIT: Camera is null");
         }
@@ -59,6 +77,7 @@ public class HuskyLensCam {
         this.specimenScreenYLimit = specimenScreenYLimit;
         this.cameraHeightCm = cameraHeightCm;
         this.cameraTiltDeg = cameraTiltDeg;
+        this.cameraLateralOffsetCm = cameraLateralOffsetCm;
 
         // Define color IDs
         idToColor.put(1, "Yellow");
@@ -75,6 +94,7 @@ public class HuskyLensCam {
     public int getSpecimenScreenYLimit() { return specimenScreenYLimit; }
     public double getCameraHeightCm() { return cameraHeightCm; }
     public double getCameraTiltDeg() { return cameraTiltDeg; }
+    public double getCameraLateralOffsetCm() { return cameraLateralOffsetCm; }
     public HuskyLens getCamera() { return camera; }
 
     private void setFocalPoint(double focalPoint) { this.focalPoint = focalPoint; }
@@ -104,9 +124,10 @@ public class HuskyLensCam {
         double distance = (realWidth * focalPoint) / correctedPixelWidth;
 
         // --- NEW CALCULATION ---
-        // Compute the lateral distance (left/right offset from the center of the robot)
-        // This is calculated using the distance and the yaw angle
-        double lateralDistance = Math.sin(yawRad) * distance;
+        // Compute the lateral distance (left/right offset from the center of the camera)
+        double lateralDistanceFromCamera = Math.sin(yawRad) * distance;
+        // Adjust for the camera's lateral offset from the robot's center
+        double lateralDistanceFromRobotCenter = lateralDistanceFromCamera + this.cameraLateralOffsetCm;
         // -----------------------
 
         // Compute vertical offset relative to camera
@@ -120,7 +141,7 @@ public class HuskyLensCam {
                 block.x, block.y,
                 type, id,
                 distance,
-                lateralDistance, // <--- Pass the new value here
+                lateralDistanceFromRobotCenter, // <--- Pass the new value here
                 yawAngleDeg,
                 pitchAngleDeg,
                 objectHeight,
@@ -185,10 +206,12 @@ public class HuskyLensCam {
 
         double forwardDistanceCm = object.distance * Math.cos(objectYawRad);
 
-        double lateralDistanceCm = object.lateralDistance;
+        // This is the object's lateral distance from the ROBOT's CENTER, already adjusted for camera offset.
+        double lateralDistanceFromRobotCenterCm = object.lateralDistance;
+
 
         double forwardDistanceIn = forwardDistanceCm * CM_TO_IN;
-        double lateralDistanceIn = lateralDistanceCm * CM_TO_IN;
+        double lateralDistanceIn = lateralDistanceFromRobotCenterCm * CM_TO_IN;
 
 
         double robotRelativeX = forwardDistanceIn;
