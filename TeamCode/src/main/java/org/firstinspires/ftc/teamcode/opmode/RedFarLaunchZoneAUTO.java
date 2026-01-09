@@ -78,12 +78,14 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
     // Intake and Flywheel motors
     public DcMotorEx intake;
+
     public DcMotorEx flywheel;
 
 
     public final double TICKS_PER_REV = 28.0;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+    boolean useIntake = false;
 
 
     @Override
@@ -105,19 +107,17 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
         waitForStart();
-
-        // Set flywheel motor powers to run constant
-        // flywheel.setPower(1);
+        double intakePower = 0;
 
         // Code to set up and shoot the balls to score points in auto
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(20,-20), Math.toRadians(135))
+                .splineTo(new Vector2d(0,0), Math.toRadians(-135))
                 .build();
         drive.localizer.update();
 
-        Actions.runBlocking(new SequentialAction(
-                tab1,
-                hlServo.lookRight()));
+        // Code to read the motif and get the correct shooting order
+        // Should shoot the balls in the correct shooting order
+        Actions.runBlocking(new SequentialAction(tab1, hlServo.lookRight()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
@@ -126,26 +126,34 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone
-        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(20,20),Math.toRadians(-135)))
-                .splineTo(new Vector2d(-24,-24),Math.toRadians(90))
+        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(0,0),Math.toRadians(-135)))
+                .splineTo(new Vector2d(0,-48),Math.toRadians(-180))
                 .build();
+                // Get Intake Running
+                intakePower = -0.8; // Run forward
         Actions.runBlocking(tab2);
 
-        /* intake.setPower(1);
-
-        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
-                .splineTo(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15)))
+        // Code to intake the balls
+        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(0,-48),Math.toRadians(-180)))
+                .splineTo(new Vector2d(-12,-48),Math.toRadians(-180))
                 .build();
         Actions.runBlocking(tab3);
 
-        Action tab4 = drive.actionBu8ilder(new Pose2d(new Vector2d(-3,-45.75),Math.toRadians(Math.atan(21.75/15))))
-                .splineTo(new Vector2d(12,-24),45)
+        // Code to get into shooting position to launch the balls
+        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-12,-48),Math.toRadians(-180)))
+                .splineTo(new Vector2d(0,0),Math.toRadians(-135))
                 .build();
         Actions.runBlocking(tab4);
 
-        // TODO: Make it shoot the balls
+        // Get it to run the flywheel and shoot the balls following the motif
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
+        if (useIntake) {
+            intake.setPower(intakePower);
+        }
+
+        /* Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
                 // TODO: 9 is a placeholder, need to find real x coordinate
                 .splineTo(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3)))
                 .build();
