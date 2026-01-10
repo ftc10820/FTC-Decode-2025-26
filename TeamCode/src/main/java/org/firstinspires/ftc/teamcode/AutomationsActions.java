@@ -397,7 +397,7 @@ public class AutomationsActions {
                         }
                     } else {
                         for (ObjectInfo o : Cam.scanTag()) {
-                            if (Objects.equals(o.objectID, 2)) {
+                            if (Objects.equals(o.objectID, 4)) {
                                 goalTag = o;
                                 break;
                             }

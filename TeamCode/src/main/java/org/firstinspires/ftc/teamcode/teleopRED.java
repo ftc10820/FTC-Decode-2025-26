@@ -1,13 +1,13 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -15,96 +15,167 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+import org.threeten.bp.LocalTime;
+
+import java.util.Arrays;
 
 
 //
-@Config
-@TeleOp
+@TeleOp(name = "red teleop")
 public class teleopRED extends LinearOpMode {
     public void initialize() {
 
         // setting up drive train
-        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-        backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
-        backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
-        intake1 = hardwareMap.get(DcMotor.class, "intake");
-        transfer1 = hardwareMap.get(Servo.class,"transfer1");
-        transfer2 = hardwareMap.get(Servo.class,"transfer2");
-        transfer3 = hardwareMap.get(Servo.class,"transfer3");
-        huskyLens = hardwareMap.get(HuskyLens.class,"huskylens");
-        cam = new HuskyLensCam(huskyLens, 319.56, 200, 43.5, 13);
-        automations = new AutomationsActions();
-        camControl = automations.new HuskyLens(cam, drive, "red");
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, Math.toRadians(0)));
+        try {
+            frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+            frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+            backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+            backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+            frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+            backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+            useDrivetrain = true;
+            telemetry.addData("Debug", "drivetrain detected, proceeding with");
 
-        //flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no drivetrain detected, proceeding without");
+
+        }
+        try{
+            flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
+            useFlywheel = true;
+            telemetry.addData("Debug", "flywheel detected, proceeding with");
+
+        }
+        catch (Exception e) {
+            telemetry.addData("Debug", "no flywheel detected, proceeding without");
+
+        }
+        try{
+            intake = hardwareMap.get(DcMotor.class, "intake");
+            useIntake = true;
+            telemetry.addData("Debug", "intake detected, proceeding with");
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no intake detected, proceeding without");
+
+        }
+        try{
+            transfer = hardwareMap.get(Servo.class,"transfer");
+            transfer2 = hardwareMap.get(Servo.class,"transfer2");
+            transfer3 = hardwareMap.get(Servo.class,"transfer3");
+            useTransfer = true;
+            telemetry.addData("Debug", "transfer detected, proceeding with");
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no transfer detected, proceeding without");
+
+        }
+        try {
+            colorSensor1 = hardwareMap.get(ColorSensor.class, "colorSensor1");
+            colorSensor2 = hardwareMap.get(ColorSensor.class, "colorSensor2");
+            colorSensor3 = hardwareMap.get(ColorSensor.class, "colorSensor3");
+
+            useColorSensor = true;
+            telemetry.addData("Debug", "color sensor detected, proceeding with. 1: "+colorSensor1.getI2cAddress()+" 2: "+colorSensor2.getI2cAddress()+" 3: "+colorSensor3.getI2cAddress());
+
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no color sensor detected, proceeding without");
+
+        }
+        try{
+            AutomationsActions actions = new AutomationsActions();
+            drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
+            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"red");
+            transferControl = actions.new Transfer(hardwareMap, drive);
+            shooterControl = actions.new Shooter(hardwareMap);
+            hlservo = actions.new HuskyLensServo(hardwareMap);
+
+            isUseCam = true;
+            telemetry.addData("Debug", "cam detected, proceeding with");
+
+        } catch (Exception e) {
+            telemetry.addData("Debug", "no cam detected, proceeding without");
+
+        }
+        telemetry.update();
+
+        if (useFlywheel){
+            flywheel.setDirection(DcMotorSimple.Direction.REVERSE);
+            flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (useDrivetrain){
+            frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }   }
 
 
     void driveMethod() {
 
-        double y = -gamepad1.left_stick_y;
-        double x = gamepad1.left_stick_x;
-        double turn = gamepad1.right_stick_x;
+        double max;
 
-        double theta = Math.atan2(y, x);
-        double power = Math.hypot(x, y);
+        // POV Mode uses left joystick to go forward & strafe, and right joystick to rotate.
+        double axial   = -gamepad1.left_stick_y;  // Note: pushing stick forward gives negative value
+        double lateral =  gamepad1.left_stick_x;
+        double yaw     =  gamepad1.right_stick_x;
 
-        double sin = Math.sin(theta - Math.PI / 4);
-        double cos = Math.cos(theta - Math.PI / 4);
-        double max = Math.max(Math.abs(sin), Math.abs(cos));
+        // Combine the joystick requests for each axis-motion to determine each wheel's power.
+        // Set up a variable for each drive wheel to save the power level for telemetry.
+        frontLeftPower  = axial + lateral + yaw;
+        frontRightPower = axial - lateral - yaw;
+        backLeftPower   = axial - lateral + yaw;
+        backRightPower  = axial + lateral - yaw;
 
-        frontLeftPower = power * cos / max + turn;
-        frontRightPower = power * sin / max - turn;
-        backLeftPower = power * sin / max + turn;
-        backRightPower = power * cos / max - turn;
+        // Normalize the values so no wheel power exceeds 100%
+        // This ensures that the robot maintains the desired motion.
+        max = Math.max(Math.abs(frontLeftPower), Math.abs(frontRightPower));
+        max = Math.max(max, Math.abs(backLeftPower));
+        max = Math.max(max, Math.abs(backRightPower));
 
-        if ((power + Math.abs(turn)) > 1) {
-
-            frontLeftPower /= power + Math.abs(turn);
-            frontRightPower /= power + Math.abs(turn);
-            backLeftPower /= power + Math.abs(turn);
-            backRightPower /= power + Math.abs(turn);
-
+        if (max > 1.0) {
+            frontLeftPower  /= max;
+            frontRightPower /= max;
+            backLeftPower   /= max;
+            backRightPower  /= max;
         }
 
 
     }
 
 
-    public DcMotor intake1 = null;
+    public DcMotor intake = null;
 
-    public Servo transfer1 = null;
-
-
-
+    boolean useIntake = false;
+    boolean useFlywheel = false;
+    boolean useTransfer = false;
+    boolean useDrivetrain = false;
+    boolean useColorSensor = false;
+    public Servo transfer = null;
     public Servo transfer2 = null;
-
-
-
     public Servo transfer3 = null;
-    HuskyLens huskyLens = null;
-    MecanumDrive drive = null;
-    HuskyLensCam cam = null;
-    AutomationsActions.HuskyLens camControl = null;
-    AutomationsActions automations = null;
+
     // drive train motors
     public DcMotor frontLeft;
     public DcMotor frontRight;
     public DcMotor backLeft;
     public DcMotorEx flywheel;
     public DcMotor backRight;
-    public final double TICKS_PER_REV = 28.0;
+    MecanumDrive drive;
+    public ColorSensor colorSensor1;
+    public ColorSensor colorSensor2;
+    public ColorSensor colorSensor3;
+    public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.Transfer transferControl;
+    public AutomationsActions.Shooter shooterControl;
+    public AutomationsActions.HuskyLensServo hlservo;
+    public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+    public boolean isUseCam = false;
+
 
 
 
@@ -119,129 +190,159 @@ public class teleopRED extends LinearOpMode {
     ElapsedTime eTime2 = new ElapsedTime();
 
     ElapsedTime eTeleOp = new ElapsedTime();
+    AutomationsActions.BallColor[] shootingOrder;
 
     double speedFactor = 0.8;
 
     public void runOpMode() throws InterruptedException {
         initialize();
         //pivot encoder homing
-
-        double intakePower =0;
-        double flywheelPower = 0;
-        double transferPosition1 = 0;
-        double transferPosition2 = 0;
-        double transferPosition3 = 0;
-        intake1.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        intake1.setPower(0);
-
-        transfer1.setPosition(0);
-        transfer2.setPosition(0);
-        transfer3.setPosition(0);
-
-
+       Actions.runBlocking(hlservo.lookForward());
 
         waitForStart();
         eTeleOp.reset();
+        double intakePower =0;
+        double flywheelPower = 0;
+
         while (opModeIsActive()) {
+            if (isUseCam) {
+                drive.localizer.update();
+
+                Pose2d pose = drive.localizer.getPose();
+                telemetry.addData("x", pose.position.x);
+                telemetry.addData("y", pose.position.y);
+                telemetry.addData("heading (deg)", Math.toDegrees(pose.heading.log()));
+            }
+            if (useColorSensor){
+            telemetry.addData("color sensor 1 color (rgb)",colorSensor1.red()+" "+colorSensor1.green()+" "+colorSensor1.blue());
+            telemetry.addData("color sensor 2 color (rgb)",colorSensor2.red()+" "+colorSensor2.green()+" "+colorSensor2.blue());
+            telemetry.addData("color sensor 3 color (rgb)",colorSensor3.red()+" "+colorSensor3.green()+" "+colorSensor3.blue());
+            if (colorSensor1.green()>colorSensor1.blue() && colorSensor1.green()>colorSensor1.red()&&colorSensor1.green()>65){
+                telemetry.addData("color sensor 1","green");
+
+            }else{
+                telemetry.addData("color sensor 1","purple");
+            }
+            if (colorSensor2.green()>colorSensor2.blue() && colorSensor2.green()>colorSensor2.red()&&colorSensor2.green()>65){
+                telemetry.addData("color sensor 2","green");
+
+            }else{
+                telemetry.addData("color sensor 2","purple");
+            }
+            if (colorSensor3.green()>colorSensor3.blue() && colorSensor3.green()>colorSensor3.red()&&colorSensor3.green()>65){
+                telemetry.addData("color sensor 3","green");
+
+            }else{
+                telemetry.addData("color sensor 3","purple");
+            }}
+
+
 
             driveMethod();
 
-/*
-            if (gamepad2.b && gamepad2.x) {
+
+            // These conditions change the state, which will persist.
+            if (gamepad1.x) {
+                intakePower = -0.8;  // Run forward
+            } else if (gamepad1.b) {
+                intakePower = 0.8; // Run backward
+            } else if (gamepad1.y){
                 intakePower = 0;
             }
-            // These conditions change the state, which will persist.
-            else if (gamepad2.b) {
-                intakePower = 1;  // Run forward
-            } else if (gamepad2.x) {
-                intakePower = -1; // Run backward
+
+            if (gamepad1.left_bumper) {
+                if (isUseCam) {
+                    Actions.runBlocking(camControl.autoAlignGoal());
+                }
             }
+
+
             if (gamepad2.a){
                 flywheelPower = 0;
             }
             if (gamepad2.y){
                 flywheelPower = 1;
             }
- */
-            intakePower = 0;
-            if (gamepad1.y){
-                intake1.setPower(1);
-
-                intakePower = 1;
+            if (gamepad2.right_bumper){
+                try{
+                ObjectInfo target = camControl.Cam.scanTag().get(0);
+                Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(), shooterControl.spinUp(target),transferControl.doTransfer(shootingOrder,target.distance)));
+                telemetry.addData("debug","transfering in order: "+ Arrays.toString(shootingOrder));
+                telemetry.update();}
+                catch (Exception e){
+                    telemetry.addData("debug","no tag detected");
+                }
             }
-            if (gamepad1.a){
-                intake1.setPower(0);
-
-                intakePower = 0;
+            if (gamepad2.dpad_left){
+                transfer.setPosition(0);
             }
-            if (gamepad2.dpad_left) {
-                transfer1.setPosition(0);
-            }
-            if (gamepad2.dpad_right) {
-                transfer1.setPosition(1);
-            }
-            if (gamepad2.dpad_down) {
+            if (gamepad2.dpad_up){
                 transfer2.setPosition(0);
             }
-            if (gamepad2.dpad_up) {
-                transfer2.setPosition(1);
-            }
-            if (gamepad2.x){
+            if (gamepad2.dpad_right){
                 transfer3.setPosition(0);
             }
-            if (gamepad2.b){
-                transfer3.setPosition(1);
-            }
-            if (gamepad1.left_trigger>0){
-                drive.localizer.setPose(new Pose2d(0, 0, Math.toRadians(0)));
-                Actions.runBlocking(camControl.autoAlignGoal());
-                sleep(1);
+            if (gamepad2.dpad_down){
+                transfer.setPosition(0.45);
+                transfer2.setPosition(0.45);
+                transfer3.setPosition(0.45);
             }
 
-//            if (gamepad2.right_bumper){
-//
-//                if (transferPosition != 0) {
-//                    telemetry.addData("debug","position 0");
-//                    telemetry.update();
-//                    transferPosition = 0;
-//                } else {
-//                    telemetry.addData("debug","position 1");
-//                    telemetry.update();
-//                    transferPosition = 1;
-//                        }
-//            }
-//                sleep(500);
 
-            if (gamepad2.y){
-                flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
-            }else if (gamepad2.a){
-                flywheel.setVelocity(0);
+
+            if (useFlywheel){
+                if (gamepad2.y){
+                    try {
+                        ObjectInfo target = camControl.Cam.scanTag().get(0);
+                        telemetry.addData("cam", target.toString());
+                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, target.realHeight-25);
+                        telemetry.addData("shooter target rpm", targetRPM);
+
+                        Actions.runBlocking(shooterControl.spinUp(targetRPM));
+                    } catch (Exception e){
+                        telemetry.addData("cam","no tag detected");
+
+                    }
+                }
+                if (gamepad2.a){
+                    flywheel.setPower(0);
+                }
+
+                telemetry.addData("flywheel",flywheel.getVelocity()+", timestamp : "+ LocalTime.now());
+
             }
-            if (gamepad2.right_bumper){
-                transfer1.setPosition(.13);
+            if (useIntake){
+                intake.setPower(intakePower);
+            }
+            if(isUseCam){
+                if (gamepad2.left_trigger>0){
+                    try{
+                    telemetry.addData("cam", Arrays.toString(camControl.getShootingOrder()));
+                    } catch (Exception e){
+                        telemetry.addData("cam","no tag detected");
+
+                    }
+                }
+                if (gamepad1.a){
+                    shootingOrder = camControl.getShootingOrder();
+                    telemetry.addData("shooting order", Arrays.toString(shootingOrder));
+                    telemetry.update();
+                }
+            }
+            if (gamepad2.x){
+                transfer.setPosition(.13);
                 transfer2.setPosition(.13);
                 transfer3.setPosition(.13);
                 flywheel.setPower(-0.15);
             }
-            if(gamepad2.left_bumper){
-                telemetry.addData("debug",camControl.getShootingOrder());
-                telemetry.update();
-
+            if (useDrivetrain) {
+                frontLeft.setPower(speedFactor * (frontLeftPower));
+                frontRight.setPower(speedFactor * (frontRightPower));
+                backLeft.setPower(speedFactor * (backLeftPower));
+                backRight.setPower(speedFactor * (backRightPower));
             }
-
-
-
-            frontLeft.setPower(speedFactor*(frontLeftPower));
-            frontRight.setPower(speedFactor*(frontRightPower));
-            backLeft.setPower(speedFactor*(backLeftPower));
-            backRight.setPower(speedFactor*(backRightPower));
-
-
+            telemetry.update();
 
         }
     }
 }
-
-
-
