@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -100,8 +100,16 @@ public class AutomationsActions {
             return term1 * sqrtTerm;
         }
 
+        public double getRPMFromDistance(ObjectInfo objectInfo) {
+            return getRPMFromDistance(objectInfo.distance, objectInfo.realHeight - 25);
+        }
+
         public Action spinUp(double rpm) {
             return new SpinUp(rpm);
+        }
+
+        public Action spinUp(ObjectInfo objectInfo) {
+            return new SpinUp(getRPMFromDistance(objectInfo));
         }
 
         public Action spinUp() {
@@ -113,19 +121,26 @@ public class AutomationsActions {
     public class Transfer {
         private final Servo transfer1, transfer2, transfer3;
         private final ColorSensor colorSensor1, colorSensor2, colorSensor3;
+        private final MecanumDrive drive;
 
+        // The horizontal distance from the center of the robot to the left/right shooter shafts in cm.
+        // This is the "opposite" side of our trigonometry triangle.
+        // THIS VALUE NEEDS TO BE MEASURED AND TUNED ON YOUR ROBOT.
+        private static final double SHOOTER_OFFSET_CM = 13.97;
 
         private static final double POS_INITIAL = 0.45;
         private static final double POS_ACTIVE = 0;
-        private static final double WAIT_TIME = 2.0; // Time between each servo firing
+        private static final double WAIT_TIME = 2.0; // Time for servo to actuate and ball to be shot
 
         public Transfer(HardwareMap hardwareMap) {
+            this(hardwareMap, null);
+        }
+
+        public Transfer(HardwareMap hardwareMap, MecanumDrive drive) {
+            this.drive = drive;
             transfer1 = hardwareMap.get(Servo.class, "transfer");
             transfer2 = hardwareMap.get(Servo.class, "transfer2");
             transfer3 = hardwareMap.get(Servo.class, "transfer3");
-//            transfer1.setDirection(Servo.Direction.REVERSE);
-//            transfer2.setDirection(Servo.Direction.REVERSE);
-//            transfer3.setDirection(Servo.Direction.REVERSE);
             colorSensor1 = hardwareMap.get(ColorSensor.class, "colorSensor1");
             colorSensor2 = hardwareMap.get(ColorSensor.class, "colorSensor2");
             colorSensor3 = hardwareMap.get(ColorSensor.class, "colorSensor3");
@@ -144,18 +159,16 @@ public class AutomationsActions {
                 default: return BallColor.NONE;
             }
 
-
             if (((DistanceSensor) sensor).getDistance(DistanceUnit.CM) > 3.47) {
                 return BallColor.NONE;
             }
-
 
             double greenValue = Math.max(1, sensor.green());
             double redValue = Math.max(1, sensor.red());
             double blueValue = Math.max(1, sensor.blue());
 
-            boolean isGreen = greenValue>redValue && greenValue>blueValue && greenValue>100;
-            boolean isPurple = blueValue>redValue && blueValue>greenValue && blueValue>100;
+            boolean isGreen = greenValue > redValue && greenValue > blueValue && greenValue > 100;
+            boolean isPurple = blueValue > redValue && blueValue > greenValue && blueValue > 100;
 
             if (isGreen) {
                 return BallColor.GREEN;
@@ -166,21 +179,94 @@ public class AutomationsActions {
             }
         }
 
-        public class DoTransfer implements Action {
-            private final ElapsedTime timer = new ElapsedTime();
-            private final int[] sequence;
-            private int currentStep = 0;
-            private boolean isWaiting = false;
-            HashMap<Integer, BallColor> detectedColors = new HashMap<>();
-            List<Integer> builtSequence = new ArrayList<>();
-            public DoTransfer(BallColor[] shootingOrder) {
+        /**
+         * Calculates the required robot rotation in radians to aim a specific shooter at the target.
+         *
+         * @param servoId The ID of the shooter (1 for left, 2 for center, 3 for right).
+         * @param distance The distance to the target in cm (the "adjacent" side of the triangle).
+         * @return The angle in radians to turn. Positive for right, negative for left.
+         */
+        private double getAngleForServo(int servoId, double distance) {
+            if (servoId == 2) {
+                return 0; // Center shooter is always straight ahead.
+            }
 
+            // Using atan(opposite / adjacent) to find the angle.
+            double angle = Math.atan(SHOOTER_OFFSET_CM / distance);
+
+            if (servoId == 1) {
+                return -angle; // Left shooter requires a negative (counter-clockwise) turn.
+            } else { // servoId == 3
+                return angle;  // Right shooter requires a positive (clockwise) turn.
+            }
+        }
+
+
+        private Servo getServo(int id) {
+            switch (id) {
+                case 1: return transfer1;
+                case 2: return transfer2;
+                case 3: return transfer3;
+                default: return null;
+            }
+        }
+
+        public class ShootAction implements Action {
+            private final int servoId;
+            private final ElapsedTime timer = new ElapsedTime();
+            private boolean servoMoved = false;
+
+            public ShootAction(int servoId) {
+                this.servoId = servoId;
+            }
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!servoMoved) {
+                    Servo currentServo = getServo(servoId);
+                    if (currentServo != null) {
+                        currentServo.setPosition(POS_ACTIVE);
+                    }
+                    timer.reset();
+                    servoMoved = true;
+                }
+
+                if (timer.seconds() >= WAIT_TIME) {
+                    Servo currentServo = getServo(servoId);
+                    if (currentServo != null) {
+                        currentServo.setPosition(POS_INITIAL);
+                    }
+                    return false; // Action finished
+                }
+                return true; // Still waiting
+            }
+        }
+
+        public Action doTransfer(BallColor[] shootingOrder, double distance) {
+            return new RobotCentricShootingAction(shootingOrder, distance);
+        }
+
+        public Action doTransfer(BallColor[] shootingOrder) {
+            return new RobotCentricShootingAction(shootingOrder, null);
+        }
+
+        private class RobotCentricShootingAction implements Action {
+            private final int[] sequence;
+            private final Double distance;
+            private boolean initialized = false;
+            private double startHeading = 0;
+            private Action currentAction = null;
+            private int sequenceIndex = 0;
+
+            RobotCentricShootingAction(BallColor[] shootingOrder, Double distance) {
+                this.distance = distance;
+                // 1. Build the shooting sequence
+                HashMap<Integer, BallColor> detectedColors = new HashMap<>();
                 detectedColors.put(1, getColorOfSensor(1));
                 detectedColors.put(2, getColorOfSensor(2));
                 detectedColors.put(3, getColorOfSensor(3));
 
-
-
+                List<Integer> builtSequence = new ArrayList<>();
                 List<Integer> availablePositions = new ArrayList<>(Arrays.asList(1, 2, 3));
 
                 for (BallColor desiredColor : shootingOrder) {
@@ -197,56 +283,63 @@ public class AutomationsActions {
                     }
                 }
                 builtSequence.addAll(availablePositions);
-
-                this.sequence = builtSequence.stream().mapToInt(i->i).toArray();
-            }
-
-            private Servo getServo(int id) {
-                switch (id) {
-                    case 1: return transfer1;
-                    case 2: return transfer2;
-                    case 3: return transfer3;
-                    default: return null;
-                }
+                this.sequence = builtSequence.stream().mapToInt(i -> i).toArray();
             }
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                packet.put("detected colors",detectedColors.toString());
-                packet.put("shooting sequence", Arrays.toString(sequence));
-                if (currentStep >= sequence.length) {
-                    return false;
-                }
-
-
-                if (isWaiting) {
-                    if (timer.seconds() >= WAIT_TIME) {
-                        isWaiting = false;
-                        currentStep++;
+                if (drive == null || distance == null) {
+                    if (currentAction == null) {
+                        List<Action> actions = new ArrayList<>();
+                        for (int servoId : sequence) {
+                            actions.add(new ShootAction(servoId));
+                        }
+                        currentAction = new SequentialAction(actions);
                     }
-                    return true;
+                    return currentAction.run(packet);
                 }
 
-
-                int servoId = sequence[currentStep];
-                Servo currentServo = getServo(servoId);
-
-                if (currentServo != null) {
-                    currentServo.setPosition(POS_ACTIVE);
+                if (!initialized) {
+                    drive.localizer.update();
+                    startHeading = drive.localizer.getPose().heading.log();
+                    initialized = true;
                 }
 
+                if (currentAction != null && !currentAction.run(packet)) {
+                    currentAction = null; // Previous action finished, clear it.
+                }
 
-                timer.reset();
-                isWaiting = true;
+                if (currentAction == null) {
+                    if (sequenceIndex < sequence.length) {
+                        // Still shots to do
+                        int servoId = sequence[sequenceIndex];
+                        // Calculate the turn angle based on distance
+                        double turnAngle = getAngleForServo(servoId, distance);
+                        double targetHeading = startHeading + turnAngle;
 
-                return true;
+                        drive.localizer.update();
+                        currentAction = new SequentialAction(
+                                drive.actionBuilder(drive.localizer.getPose()).turnTo(targetHeading).build(),
+                                new ShootAction(servoId)
+                        );
+                        sequenceIndex++;
+                    } else if (sequenceIndex == sequence.length) {
+                        // Finished all shots, turn back to start
+                        drive.localizer.update();
+                        currentAction = drive.actionBuilder(drive.localizer.getPose()).turnTo(startHeading).build();
+                        sequenceIndex++; // Mark as done with turning back
+                    } else {
+                        // All done
+                        return false;
+                    }
+                }
+
+                return true; // Action is running or we've just queued a new one.
             }
         }
-
-        public Action doTransfer(BallColor[] shootingOrder) {
-            return new DoTransfer(shootingOrder);
-        }
     }
+
+
     public class HuskyLens {
         public final HuskyLensCam Cam;
         private ObjectInfo goalTag = null;
@@ -255,11 +348,15 @@ public class AutomationsActions {
 
         public HuskyLens(HuskyLensCam cam, MecanumDrive drive, String alliance) {
             Cam = cam;
-            if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")){
-                throw new IllegalArgumentException("Invalid alliance: " + alliance+ " use red or blue");
+            if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")) {
+                throw new IllegalArgumentException("Invalid alliance: " + alliance + " use red or blue");
             }
             Alliance = alliance.toLowerCase();
             Drive = drive;
+        }
+
+        public ObjectInfo getGoalTag() {
+            return goalTag;
         }
 
         public BallColor[] getShootingOrder() {
@@ -282,6 +379,7 @@ public class AutomationsActions {
                     return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.PURPLE};
             }
         }
+
         public class AutoAlignGoal implements Action {
             private boolean initialized = false;
             private Action trajectoryAction;
@@ -311,7 +409,7 @@ public class AutomationsActions {
                         packet.put("targetPose: ", targetPose.toString());
                         packet.put("currentPose: ", Drive.localizer.getPose().toString());
                         trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                                .turnTo(targetPose.heading)
+                                .turnTo(targetPose.heading.log())
                                 .build();
                     }
                     initialized = true;
@@ -322,16 +420,20 @@ public class AutomationsActions {
                 return false;
             }
         }
+
         public Action autoAlignGoal() {
             return new AutoAlignGoal();
         }
     }
-    public class HuskyLensServo{
+
+    public class HuskyLensServo {
         private final Servo hlServo;
-        public HuskyLensServo(HardwareMap hardwareMap){
-            hlServo = hardwareMap.get(Servo.class,"hlServo");
+
+        public HuskyLensServo(HardwareMap hardwareMap) {
+            hlServo = hardwareMap.get(Servo.class, "hlServo");
         }
-        public class LookRight implements Action{
+
+        public class LookRight implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_RIGHT);
@@ -340,11 +442,12 @@ public class AutomationsActions {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                packet.put("hlServo pos",hlServo.getPosition());
+                packet.put("hlServo pos", hlServo.getPosition());
                 return false;
             }
         }
-        public class LookLeft implements Action{
+
+        public class LookLeft implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_LEFT);
@@ -353,15 +456,16 @@ public class AutomationsActions {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                packet.put("hlServo pos",hlServo.getPosition());
+                packet.put("hlServo pos", hlServo.getPosition());
                 return false;
             }
         }
-        public class LookForward implements Action{
+
+        public class LookForward implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_FORWARD);
-                packet.put("hlServo pos",hlServo.getPosition());
+                packet.put("hlServo pos", hlServo.getPosition());
                 try {
                     sleep(500);
                 } catch (InterruptedException e) {
@@ -370,11 +474,12 @@ public class AutomationsActions {
                 return false;
             }
         }
-        public class LookBack implements Action{
+
+        public class LookBack implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 hlServo.setPosition(DecodeConstants.HLSERVO_LOOK_BACK);
-                packet.put("hlServo pos",hlServo.getPosition());
+                packet.put("hlServo pos", hlServo.getPosition());
                 try {
                     sleep(500);
                 } catch (InterruptedException e) {
@@ -383,9 +488,21 @@ public class AutomationsActions {
                 return false;
             }
         }
-        public Action lookRight() {return new LookRight();}
-        public Action lookLeft() {return new LookLeft();}
-        public Action lookForward() {return new LookForward();}
-        public Action lookBack() {return new LookBack();}
+
+        public Action lookRight() {
+            return new LookRight();
+        }
+
+        public Action lookLeft() {
+            return new LookLeft();
+        }
+
+        public Action lookForward() {
+            return new LookForward();
+        }
+
+        public Action lookBack() {
+            return new LookBack();
+        }
     }
 }

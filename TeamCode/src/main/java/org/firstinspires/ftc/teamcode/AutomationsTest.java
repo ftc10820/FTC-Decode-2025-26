@@ -2,6 +2,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -87,7 +88,7 @@ public class AutomationsTest extends LinearOpMode {
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
             camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"red");
-            transferControl = actions.new Transfer(hardwareMap);
+            transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
 
             isUseCam = true;
@@ -262,14 +263,15 @@ public class AutomationsTest extends LinearOpMode {
                 flywheelPower = 1;
             }
             if (gamepad2.right_bumper){
-                Actions.runBlocking(transferControl.doTransfer(shootingOrder));
+                try{
+                ObjectInfo target = camControl.Cam.scanTag().get(0);
+                Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(), shooterControl.spinUp(target),transferControl.doTransfer(shootingOrder,target.distance)));
                 telemetry.addData("debug","transfering in order: "+ Arrays.toString(shootingOrder));
-                telemetry.update();
-                sleep(4000);
-                transfer.setPosition(0.45);
-                transfer2.setPosition(0.45);
-                transfer3.setPosition(0.45);
+                telemetry.update();}
+                catch (Exception e){
+                    telemetry.addData("debug","no tag detected");
                 }
+            }
             if (gamepad2.dpad_left){
                 transfer.setPosition(0);
             }

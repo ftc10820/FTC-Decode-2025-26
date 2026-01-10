@@ -107,32 +107,38 @@ public class HuskyLensCam {
         double xOffset = block.x - CAMERA_CENTER_X;
         double yOffset = block.y - CAMERA_CENTER_Y; // yOffset is used later for pitch
 
-        // Horizontal angle (yaw)
-        double yawAngleDeg = (xOffset / CAMERA_CENTER_X) * (HORIZONTAL_FOV / 2.0);
+        // Horizontal angle (yaw) as seen by the camera
+        double cameraYawAngleDeg = (xOffset / CAMERA_CENTER_X) * (HORIZONTAL_FOV / 2.0);
+        double cameraYawRad = Math.toRadians(cameraYawAngleDeg);
 
-        // ... (rawPitchDeg, pitchAngleDeg calculations omitted for brevity, assumed unchanged)
+        // Corrected pixel width based on its horizontal position in the frame
+        double correctedPixelWidth = block.width / Math.cos(cameraYawRad);
+
+        // Compute horizontal distance (straight line distance from camera to object)
+        double distanceToObj = (realWidth * focalPoint) / correctedPixelWidth;
+
+        // Compute the lateral distance (left/right offset from the center of the camera)
+        double lateralDistanceFromCamera = Math.sin(cameraYawRad) * distanceToObj;
+
+        // Adjust for the camera's own lateral offset from the robot's center
+        double lateralDistanceFromRobotCenter = lateralDistanceFromCamera + this.cameraLateralOffsetCm;
+
+        // Compute forward distance (along the robot's centerline)
+        double forwardDistance = Math.cos(cameraYawRad) * distanceToObj;
+
+        // NEW: Recalculate the overall distance and yaw angle from the ROBOT's CENTER
+        double totalDistance = Math.hypot(forwardDistance, lateralDistanceFromRobotCenter);
+        double robotYawRad = Math.atan2(lateralDistanceFromRobotCenter, forwardDistance);
+        double robotYawDeg = Math.toDegrees(robotYawRad);
+
         // Raw pitch angle (positive = up, negative = down)
         double rawPitchDeg = -(yOffset / CAMERA_CENTER_Y) * (VERTICAL_FOV / 2.0);
         // Adjust with camera tilt
         double pitchAngleDeg = rawPitchDeg + cameraTiltDeg;
 
-        // Corrected pixel width
-        double yawRad = Math.toRadians(yawAngleDeg);
-        double correctedPixelWidth = block.width / Math.cos(yawRad);
-
-        // Compute horizontal distance (straight line distance to object)
-        double distance = (realWidth * focalPoint) / correctedPixelWidth;
-
-        // --- NEW CALCULATION ---
-        // Compute the lateral distance (left/right offset from the center of the camera)
-        double lateralDistanceFromCamera = Math.sin(yawRad) * distance;
-        // Adjust for the camera's lateral offset from the robot's center
-        double lateralDistanceFromRobotCenter = lateralDistanceFromCamera + this.cameraLateralOffsetCm;
-        // -----------------------
-
-        // Compute vertical offset relative to camera
+        // Compute vertical offset relative to camera, using the direct distance to the object
         double totalPitchRad = Math.toRadians(pitchAngleDeg);
-        double verticalOffset = Math.tan(totalPitchRad) * distance;
+        double verticalOffset = Math.tan(totalPitchRad) * distanceToObj;
 
         // Estimate object height from ground
         double objectHeight = cameraHeightCm + verticalOffset;
@@ -140,14 +146,15 @@ public class HuskyLensCam {
         return new ObjectInfo(
                 block.x, block.y,
                 type, id,
-                distance,
-                lateralDistanceFromRobotCenter, // <--- Pass the new value here
-                yawAngleDeg,
+                totalDistance, // Distance from robot center
+                lateralDistanceFromRobotCenter,
+                robotYawDeg,   // Yaw from robot center
                 pitchAngleDeg,
                 objectHeight,
                 time
         );
     }
+
 
 
 
