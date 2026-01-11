@@ -264,9 +264,9 @@ public class teleop_2 extends LinearOpMode {
                 transfer3.setPosition(0);
             }
             if (gamepad2.dpad_down){
-                transfer.setPosition(0.45);
-                transfer2.setPosition(0.45);
-                transfer3.setPosition(0.45);
+                transfer.setPosition(0.42);
+                transfer2.setPosition(0.42);
+                transfer3.setPosition(0.42);
             }
 
 
