@@ -273,9 +273,9 @@ public class SingleDriverTeleOp extends LinearOpMode {
                 transfer3.setPosition(0);
             }
             if (gamepad1.dpad_down){
-                transfer.setPosition(0.45);
-                transfer2.setPosition(0.45);
-                transfer3.setPosition(0.45);
+                transfer.setPosition(0.48);
+                transfer2.setPosition(0.48);
+                transfer3.setPosition(0.48);
             }
 
                 telemetry.addData("flywheel",flywheel.getVelocity()+", timestamp : "+ LocalTime.now());

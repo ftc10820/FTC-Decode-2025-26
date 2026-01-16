@@ -111,7 +111,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         // Code to set up and shoot the balls to score points in auto
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(0,0), Math.toRadians(-135))
+                .splineTo(new Vector2d(20,-20), Math.toRadians(-135))
                 .build();
         drive.localizer.update();
 
@@ -141,7 +141,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         // Code to get into shooting position to launch the balls
         Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-12,-48),Math.toRadians(-180)))
-                .splineTo(new Vector2d(0,0),Math.toRadians(-135))
+                .splineTo(new Vector2d(20,-20),Math.toRadians(-135))
                 .build();
         Actions.runBlocking(tab4);
 
