@@ -273,7 +273,7 @@ public class teleop_2 extends LinearOpMode {
 
             if (useFlywheel){
                 if (gamepad2.y){
-                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
+                    flywheel.setPower(1);
                 }
                 if (gamepad2.a){
                     flywheel.setPower(0);

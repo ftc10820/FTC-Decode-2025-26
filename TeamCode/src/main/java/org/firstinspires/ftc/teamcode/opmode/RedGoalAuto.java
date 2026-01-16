@@ -19,6 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
 
 import java.util.Arrays;
 
@@ -40,14 +41,16 @@ public class RedGoalAuto extends LinearOpMode {
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
         AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap,drive);
 
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
                 .lineToX(20)
                 .build();
-        drive.localizer.update();
+
+
+
 
 
         waitForStart();
@@ -58,12 +61,30 @@ public class RedGoalAuto extends LinearOpMode {
        
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         sleep(500);
+        drive.localizer.update();
+        Actions.runBlocking(new SequentialAction(hlServo.lookForward(), camControl.autoAlignGoal()));
+        drive.localizer.update();
+        ObjectInfo target;
+        for (;;){
+            try{
+            target = cam.scanTag().get(0);
+            break;
+            } catch (Exception e){
+
+            }
+        }
+        sleep(500);
         Actions.runBlocking(new SequentialAction(shooter.spinUp(), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-     
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
+        drive.localizer.update();
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,target.distance),shooter.spinUp(0)));
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .splineTo(new Vector2d(12,-48),Math.PI)
+                .build();
+        Actions.runBlocking(tab2);
         while(opModeIsActive()) {
             sleep(50);
         }

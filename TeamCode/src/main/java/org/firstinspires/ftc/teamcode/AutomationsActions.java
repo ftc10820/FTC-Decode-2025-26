@@ -65,7 +65,6 @@ public class AutomationsActions {
                 double vel = motor.getVelocity();
                 packet.put("shooterVelocity goal", -targetVelocity);
                 packet.put("shooterVelocity", vel);
-
                 return (Math.abs(vel) < 0.95 * Math.abs(targetVelocity));
             }
         }
@@ -128,7 +127,7 @@ public class AutomationsActions {
         // THIS VALUE NEEDS TO BE MEASURED AND TUNED ON YOUR ROBOT.
         private static final double SHOOTER_OFFSET_CM = 13.97;
 
-        private static final double POS_INITIAL = 0.45;
+        private static final double POS_INITIAL = 0.5;
         private static final double POS_ACTIVE = 0;
         private static final double WAIT_TIME = 2.0; // Time for servo to actuate and ball to be shot
 
@@ -408,8 +407,9 @@ public class AutomationsActions {
                         Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
                         packet.put("targetPose: ", targetPose.toString());
                         packet.put("currentPose: ", Drive.localizer.getPose().toString());
+                        Drive.localizer.update();
                         trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                                .turnTo(targetPose.heading.log())
+                                .turnTo(Math.toRadians(-1*Math.atan((targetPose.position.x - Drive.localizer.getPose().position.x)/(targetPose.position.y - Drive.localizer.getPose().position.y))))
                                 .build();
                     }
                     initialized = true;
