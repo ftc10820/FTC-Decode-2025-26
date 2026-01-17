@@ -82,7 +82,8 @@ public class RedGoalAuto extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,target.distance),shooter.spinUp(0)));
         drive.localizer.update();
         Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .splineTo(new Vector2d(12,-48),Math.PI)
+                .lineToX(10)
+                .turnTo(Math.PI)
                 .build();
         Actions.runBlocking(tab2);
         while(opModeIsActive()) {
