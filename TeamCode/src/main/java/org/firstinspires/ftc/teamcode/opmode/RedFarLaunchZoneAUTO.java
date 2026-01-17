@@ -127,7 +127,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         // Code to leave the launch zone
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(0,0),Math.toRadians(-135)))
-                .splineTo(new Vector2d(24,-48),Math.toRadians(-180))
+                .splineTo(new Vector2d(28,-48),Math.toRadians(-180))
                 .build();
                 // Get Intake Running
                 intakePower = -0.8; // Run forward
@@ -165,16 +165,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
             intake.setPower(intakePower);
         }
 
-        /* Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(12,-24),45))
-                // TODO: 9 is a placeholder, need to find real x coordinate
-                .splineTo(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3)))
-                .build();
-        Actions.runBlocking(tab5);
-
-        // TODO: Figure our real tangent to replace placeholder (placeholder = 0)
-        // TODO: Control whether tabs 5 and 6 could happen
-
-        Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3))))
+        /* Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3))))
                 .splineTo(new Vector2d(12,-24), 45)
                 .build();
         Actions.runBlocking(tab6);
