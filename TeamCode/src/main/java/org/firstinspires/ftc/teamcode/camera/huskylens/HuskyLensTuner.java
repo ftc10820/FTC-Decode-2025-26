@@ -1,11 +1,9 @@
-package org.firstinspires.ftc.teamcode.huskylens;
+package org.firstinspires.ftc.teamcode.camera.huskylens;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-
-@TeleOp(name = "HuskyLens Tuning", group = "Tuning")
+@TeleOp(name = "CamControl Tuning", group = "Tuning")
 public class HuskyLensTuner extends LinearOpMode {
 
     @Override

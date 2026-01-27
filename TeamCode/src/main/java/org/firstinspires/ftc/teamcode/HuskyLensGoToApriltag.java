@@ -11,8 +11,8 @@ import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-        import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+        import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
 
 import java.util.List;
 

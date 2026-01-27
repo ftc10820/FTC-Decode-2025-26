@@ -30,7 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.teamcode.huskylens;
+package org.firstinspires.ftc.teamcode.camera.huskylens;
 
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
@@ -48,7 +48,7 @@ import java.util.Map;
 import java.util.Queue;
 
 @I2cDeviceType
-@DeviceProperties(xmlTag = "huskylens", name = "HuskyLens2", description = "HuskyLens V2 Vision Sensor")
+@DeviceProperties(xmlTag = "huskylens", name = "HuskyLens2", description = "CamControl V2 Vision Sensor")
 public class HuskyLens2 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     // Constants
@@ -156,7 +156,7 @@ public class HuskyLens2 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
 
     @Override
     public String getDeviceName() {
-        return "HuskyLens V2";
+        return "CamControl V2";
     }
 
     private int checksum(byte[] cmd) {

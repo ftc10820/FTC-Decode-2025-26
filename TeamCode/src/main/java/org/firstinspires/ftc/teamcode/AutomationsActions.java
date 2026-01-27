@@ -17,14 +17,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.Camera;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 public class AutomationsActions {
 
@@ -339,13 +340,13 @@ public class AutomationsActions {
     }
 
 
-    public class HuskyLens {
-        public final HuskyLensCam Cam;
+    public class CamControl {
+        public Camera Cam;
         private ObjectInfo goalTag = null;
         private final String Alliance;
         private final MecanumDrive Drive;
 
-        public HuskyLens(HuskyLensCam cam, MecanumDrive drive, String alliance) {
+        public CamControl(HuskyLensCam cam, MecanumDrive drive, String alliance) {
             Cam = cam;
             if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")) {
                 throw new IllegalArgumentException("Invalid alliance: " + alliance + " use red or blue");
@@ -353,7 +354,14 @@ public class AutomationsActions {
             Alliance = alliance.toLowerCase();
             Drive = drive;
         }
-
+        public CamControl(LimelightCam cam, MecanumDrive drive, String alliance) {
+            Cam = cam;
+            if (!alliance.equalsIgnoreCase("red") && !alliance.equalsIgnoreCase("blue")) {
+                throw new IllegalArgumentException("Invalid alliance: " + alliance + " use red or blue");
+            }
+            Alliance = alliance.toLowerCase();
+            Drive = drive;
+        }
         public ObjectInfo getGoalTag() {
             return goalTag;
         }
@@ -367,11 +375,11 @@ public class AutomationsActions {
 
             ObjectInfo tag = tags.get(0);
             switch (tag.objectID) {
-                case 1:
+                case 21:
                     return new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
-                case 2:
+                case 22:
                     return new BallColor[]{BallColor.PURPLE, BallColor.GREEN, BallColor.PURPLE};
-                case 3:
+                case 23:
                     return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.GREEN};
                 default:
                     // Default order for any other tag ID
@@ -383,35 +391,26 @@ public class AutomationsActions {
             private boolean initialized = false;
             private Action trajectoryAction;
 
+            public AutoAlignGoal(ObjectInfo tag) {
+                goalTag = tag;
+            }
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (!initialized) {
-                    if (Objects.equals(Alliance, "red")) {
-                        for (ObjectInfo o : Cam.scanTag()) {
-                            if (Objects.equals(o.objectID, 5)) {
-                                goalTag = o;
-                                packet.put("tag ObjectInfo: ", goalTag.toString());
-                                break;
-                            }
-                        }
-                    } else {
-                        for (ObjectInfo o : Cam.scanTag()) {
-                            if (Objects.equals(o.objectID, 4)) {
-                                goalTag = o;
-                                break;
-                            }
-                        }
+                    if (goalTag == null) {
+                        return false;
                     }
 
-                    if (goalTag != null) {
-                        Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
-                        packet.put("targetPose: ", targetPose.toString());
-                        packet.put("currentPose: ", Drive.localizer.getPose().toString());
-                        Drive.localizer.update();
-                        trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                                .turnTo(Math.toRadians(-1*Math.atan((targetPose.position.x - Drive.localizer.getPose().position.x)/(targetPose.position.y - Drive.localizer.getPose().position.y))))
-                                .build();
-                    }
+
+                    Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
+                    packet.put("targetPose: ", targetPose.toString());
+                    packet.put("currentPose: ", Drive.localizer.getPose().toString());
+                    Drive.localizer.update();
+                    trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
+                            .turnTo(Math.toRadians(-1*Math.atan((targetPose.position.x - Drive.localizer.getPose().position.x)/(targetPose.position.y - Drive.localizer.getPose().position.y))))
+                            .build();
+
                     initialized = true;
                 }
                 if (trajectoryAction != null) {
@@ -421,8 +420,8 @@ public class AutomationsActions {
             }
         }
 
-        public Action autoAlignGoal() {
-            return new AutoAlignGoal();
+        public Action autoAlignGoal(ObjectInfo goalTag) {
+            return new AutoAlignGoal(goalTag);
         }
     }
 

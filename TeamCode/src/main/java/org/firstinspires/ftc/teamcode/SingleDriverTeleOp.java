@@ -2,20 +2,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;
@@ -87,7 +84,7 @@ public class SingleDriverTeleOp extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
-            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
+            camControl =  actions.new CamControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
             transferControl = actions.new Transfer(hardwareMap);
             isUseCam = true;
             telemetry.addData("Debug", "cam detected, proceeding with");
@@ -164,7 +161,7 @@ public class SingleDriverTeleOp extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
-    public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.CamControl camControl;
     public AutomationsActions.Transfer transferControl;
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;

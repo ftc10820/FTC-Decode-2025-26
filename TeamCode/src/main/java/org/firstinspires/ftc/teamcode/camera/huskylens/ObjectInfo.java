@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.huskylens;
+package org.firstinspires.ftc.teamcode.camera.huskylens;
 import androidx.annotation.NonNull;
 
 import org.threeten.bp.LocalTime;

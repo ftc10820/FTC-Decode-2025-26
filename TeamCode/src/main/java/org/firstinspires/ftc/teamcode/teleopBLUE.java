@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class teleopBLUE extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
-            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"blue");
+            camControl =  actions.new CamControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"blue");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
             hlservo = actions.new HuskyLensServo(hardwareMap);
@@ -167,7 +167,7 @@ public class teleopBLUE extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
-    public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.CamControl camControl;
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.Shooter shooterControl;
     public AutomationsActions.HuskyLensServo hlservo;
@@ -244,17 +244,17 @@ public class teleopBLUE extends LinearOpMode {
             // These conditions change the state, which will persist.
             if (gamepad1.x) {
                 intakePower = -0.8;  // Run forward
+                transfer.setPosition(0.5);
+                transfer2.setPosition(0.5);
+                transfer3.setPosition(0.5);
+                flywheel.setPower(0);
             } else if (gamepad1.b) {
                 intakePower = 0.8; // Run backward
             } else if (gamepad1.y){
                 intakePower = 0;
             }
 
-            if (gamepad1.left_bumper) {
-                if (isUseCam) {
-                    Actions.runBlocking(camControl.autoAlignGoal());
-                }
-            }
+
 
 
             if (gamepad2.a){
@@ -265,8 +265,19 @@ public class teleopBLUE extends LinearOpMode {
             }
             if (gamepad2.right_bumper){
                 try{
-                    ObjectInfo target = camControl.Cam.scanTag().get(0);
-                    Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(), shooterControl.spinUp(target),transferControl.doTransfer(shootingOrder,target.distance)));
+                    Actions.runBlocking(hlservo.lookForward());
+                    ObjectInfo goalTag;
+                    for (;;){
+                        try {
+                            goalTag = camControl.Cam.scanTag().get(0);
+                            break;
+                        } catch (Exception e){
+
+                        }
+                    }
+
+                    Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(goalTag), shooterControl.spinUp(goalTag),transferControl.doTransfer(shootingOrder,goalTag.distance)));
+
                     telemetry.addData("debug","transfering in order: "+ Arrays.toString(shootingOrder));
                     telemetry.update();}
                 catch (Exception e){
@@ -283,9 +294,9 @@ public class teleopBLUE extends LinearOpMode {
                 transfer3.setPosition(0);
             }
             if (gamepad2.dpad_down){
-                transfer.setPosition(0.45);
-                transfer2.setPosition(0.45);
-                transfer3.setPosition(0.45);
+                transfer.setPosition(0.5);
+                transfer2.setPosition(0.5);
+                transfer3.setPosition(0.5);
             }
 
 

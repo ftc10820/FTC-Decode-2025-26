@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.opmode;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
@@ -18,8 +15,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
 
 import java.util.Arrays;
 
@@ -40,8 +37,8 @@ public class RedGoalAuto extends LinearOpMode {
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap,drive);
+        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
 
         // Go to initial shooting position
@@ -62,7 +59,17 @@ public class RedGoalAuto extends LinearOpMode {
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         sleep(500);
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(hlServo.lookForward(), camControl.autoAlignGoal()));
+        Actions.runBlocking(hlServo.lookForward());
+        ObjectInfo goalTag;
+        for (;;){
+            try {
+                goalTag = cam.scanTag().get(0);
+                break;
+            } catch (Exception e){
+
+            }
+        }
+        //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
         ObjectInfo target;
         for (;;){
@@ -79,13 +86,13 @@ public class RedGoalAuto extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,target.distance),shooter.spinUp(0)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(0)));
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .lineToX(10)
-                .turnTo(Math.PI)
-                .build();
-        Actions.runBlocking(tab2);
+//        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+//                .lineToX(10)
+//                .turnTo(Math.PI)
+//                .build();
+//        Actions.runBlocking(tab2);
         while(opModeIsActive()) {
             sleep(50);
         }

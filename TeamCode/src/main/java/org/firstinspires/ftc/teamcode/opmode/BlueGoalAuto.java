@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.opmode;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
@@ -18,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 
 import java.util.Arrays;
 
@@ -38,7 +35,7 @@ public class BlueGoalAuto extends LinearOpMode {
         HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "red");
+        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
 

@@ -14,8 +14,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;
@@ -87,7 +87,7 @@ public class teleopRED extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
-            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"red");
+            camControl =  actions.new CamControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"red");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
             hlservo = actions.new HuskyLensServo(hardwareMap);
@@ -167,7 +167,7 @@ public class teleopRED extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
-    public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.CamControl camControl;
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.Shooter shooterControl;
     public AutomationsActions.HuskyLensServo hlservo;
@@ -192,7 +192,7 @@ public class teleopRED extends LinearOpMode {
     ElapsedTime eTeleOp = new ElapsedTime();
     AutomationsActions.BallColor[] shootingOrder;
 
-    double speedFactor = 0.8;
+    double speedFactor = 1;
 
     public void runOpMode() throws InterruptedException {
         initialize();
@@ -252,7 +252,17 @@ public class teleopRED extends LinearOpMode {
 
             if (gamepad1.left_bumper) {
                 if (isUseCam) {
-                    Actions.runBlocking(camControl.autoAlignGoal());
+                    Actions.runBlocking(hlservo.lookForward());
+                    ObjectInfo goalTag;
+                    for (;;){
+                        try {
+                            goalTag = camControl.Cam.scanTag().get(0);
+                            break;
+                        } catch (Exception e){
+
+                        }
+                    }
+                    Actions.runBlocking(camControl.autoAlignGoal(goalTag));
                 }
             }
 
@@ -265,8 +275,18 @@ public class teleopRED extends LinearOpMode {
             }
             if (gamepad2.right_bumper){
                 try{
-                ObjectInfo target = camControl.Cam.scanTag().get(0);
-                Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(), shooterControl.spinUp(target),transferControl.doTransfer(shootingOrder,target.distance)));
+                    Actions.runBlocking(hlservo.lookForward());
+                    ObjectInfo goalTag;
+                    for (;;){
+                        try {
+                            goalTag = camControl.Cam.scanTag().get(0);
+                            break;
+                        } catch (Exception e){
+
+                        }
+                    }
+
+                Actions.runBlocking(new SequentialAction(camControl.autoAlignGoal(goalTag), shooterControl.spinUp(goalTag),transferControl.doTransfer(shootingOrder,goalTag.distance)));
                 telemetry.addData("debug","transfering in order: "+ Arrays.toString(shootingOrder));
                 telemetry.update();}
                 catch (Exception e){

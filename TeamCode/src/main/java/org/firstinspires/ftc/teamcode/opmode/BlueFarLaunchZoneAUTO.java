@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.opmode;
 
 // RR-specific imports
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -16,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -62,10 +61,10 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
     public Servo transfer3 = null;
 
 
-    // HuskyLens and automation actions
+    // CamControl and automation actions
     HuskyLens huskyLens = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLens camControl = null;
+    AutomationsActions.CamControl camControl = null;
     AutomationsActions automations = null;
 
 
@@ -95,7 +94,7 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
         Pose2d initialPose = new Pose2d(-63,18, 0);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
-        // Automation Actions and HuskyLens
+        // Automation Actions and CamControl
         AutomationsActions actions = new AutomationsActions();
         HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
@@ -103,7 +102,7 @@ public class BlueFarLaunchZoneAUTO extends LinearOpMode {
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.HuskyLens camControl = actions.new HuskyLens(cam, drive, "blue");
+        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "blue");
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
         waitForStart();

@@ -1,13 +1,16 @@
-package org.firstinspires.ftc.teamcode.huskylens;
+package org.firstinspires.ftc.teamcode.camera.huskylens;
 
 import static android.os.SystemClock.sleep;
 import static java.lang.Math.tan;
+
+
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.camera.Camera;
 import org.threeten.bp.LocalTime;
 
 import java.util.ArrayList;
@@ -15,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HuskyLensCam {
+public class HuskyLensCam implements Camera {
     private static final double CM_TO_IN = 0.393701;
 
     // === Camera intrinsic parameters ===
@@ -41,7 +44,7 @@ public class HuskyLensCam {
 
     // === Constructor ===
     /**
-     * @param camera HuskyLens instance
+     * @param camera CamControl instance
      * @param focalPoint initial focal length (px)
      * @param specimenScreenYLimit y limit for color detection
      * @param cameraHeightCm camera height from ground (cm)
@@ -56,7 +59,7 @@ public class HuskyLensCam {
     }
 
     /**
-     * @param camera HuskyLens instance
+     * @param camera CamControl instance
      * @param focalPoint initial focal length (px)
      * @param specimenScreenYLimit y limit for color detection
      * @param cameraHeightCm camera height from ground (cm)

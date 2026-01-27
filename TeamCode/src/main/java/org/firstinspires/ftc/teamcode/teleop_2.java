@@ -1,6 +1,8 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
@@ -12,10 +14,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;
@@ -25,6 +27,7 @@ import java.util.Arrays;
 @TeleOp(name = "Testing TeleOP main")
 public class teleop_2 extends LinearOpMode {
     public void initialize() {
+        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         // setting up drive train
         try {
@@ -43,6 +46,7 @@ public class teleop_2 extends LinearOpMode {
         }
         try{
             flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
+            shooterIndicator = hardwareMap.get(CRServo.class,"shooterIndicator");
             useFlywheel = true;
             telemetry.addData("Debug", "flywheel detected, proceeding with");
 
@@ -87,7 +91,7 @@ public class teleop_2 extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
-            camControl =  actions.new HuskyLens(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
+            camControl =  actions.new CamControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20),drive,"red");
             transferControl = actions.new Transfer(hardwareMap);
             hlServo = actions.new HuskyLensServo(hardwareMap);
             isUseCam = true;
@@ -143,6 +147,7 @@ public class teleop_2 extends LinearOpMode {
 
     }
 
+    private VoltageSensor batteryVoltageSensor;
 
     public DcMotor intake = null;
 
@@ -155,6 +160,8 @@ public class teleop_2 extends LinearOpMode {
     public Servo transfer2 = null;
     public Servo transfer3 = null;
 
+    public CRServo shooterIndicator = null;
+
     // drive train motors
     public DcMotor frontLeft;
     public DcMotor frontRight;
@@ -165,7 +172,7 @@ public class teleop_2 extends LinearOpMode {
     public ColorSensor colorSensor1;
     public ColorSensor colorSensor2;
     public ColorSensor colorSensor3;
-    public AutomationsActions.HuskyLens camControl;
+    public AutomationsActions.CamControl camControl;
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.HuskyLensServo hlServo;
     public final double TICKS_PER_REV = 28;
@@ -189,8 +196,8 @@ public class teleop_2 extends LinearOpMode {
     ElapsedTime eTeleOp = new ElapsedTime();
     AutomationsActions.BallColor[] shootingOrder;
 
-    double speedFactor = 0.65;
-
+    double speedFactor = 0.9;
+    TelemetryPacket packet = new TelemetryPacket();
     public void runOpMode() throws InterruptedException {
         initialize();
         //pivot encoder homing
@@ -234,6 +241,10 @@ public class teleop_2 extends LinearOpMode {
             // These conditions change the state, which will persist.
             if (gamepad1.x) {
                 intakePower = -0.8;  // Run forward
+                transfer.setPosition(0.5);
+                transfer2.setPosition(0.5);
+                transfer3.setPosition(0.5);
+                flywheel.setPower(0);
             } else if (gamepad1.b) {
                 intakePower = 0.8; // Run backward
             } else if (gamepad1.y){
@@ -244,6 +255,12 @@ public class teleop_2 extends LinearOpMode {
             }
             if (gamepad2.y){
                 flywheelPower = 1;
+            }
+            if (gamepad2.x){
+                transfer.setPosition(.13);
+                transfer2.setPosition(.13);
+                transfer3.setPosition(.13);
+                flywheel.setPower(-0.15);
             }
 //            if (gamepad2.right_bumper){
 //                Actions.runBlocking(transferControl.doTransfer(shootingOrder));
@@ -264,16 +281,21 @@ public class teleop_2 extends LinearOpMode {
                 transfer3.setPosition(0);
             }
             if (gamepad2.dpad_down){
-                transfer.setPosition(0.48);
-                transfer2.setPosition(0.48);
-                transfer3.setPosition(0.48);
+                transfer.setPosition(0.5);
+                transfer2.setPosition(0.5);
+                transfer3.setPosition(0.5);
             }
 
-
-
+            double flywheelThreshold = 50;
+            if (Math.abs(flywheel.getVelocity())<(FLYWHEEL_TICKS_PER_REV+(flywheelThreshold*TICKS_PER_REV/60))&&Math.abs(flywheel.getVelocity())>(FLYWHEEL_TICKS_PER_REV-(flywheelThreshold*TICKS_PER_REV/60))){
+                shooterIndicator.setPower(1);
+            }
+            else{
+                shooterIndicator.setPower(0);
+            }
             if (useFlywheel){
                 if (gamepad2.y){
-                    flywheel.setPower(1);
+                    flywheel.setVelocity(FLYWHEEL_TICKS_PER_REV);
                 }
                 if (gamepad2.a){
                     flywheel.setPower(0);
@@ -311,6 +333,9 @@ public class teleop_2 extends LinearOpMode {
                 backRight.setPower(speedFactor * (backRightPower));
             }
             telemetry.update();
+           packet.put("flywheel",flywheel.getVelocity());
+           packet.put("power",batteryVoltageSensor.getVoltage());
+           FtcDashboard.getInstance().sendTelemetryPacket(packet);
 
             if (gamepad1.startWasPressed()){
                 Actions.runBlocking(hlServo.lookForward());

@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 
 
 //
@@ -91,7 +91,7 @@ public class teleop extends LinearOpMode {
     public Servo transfer3 = null;
     HuskyLens huskyLens = null;
     HuskyLensCam cam = null;
-    AutomationsActions.HuskyLens camControl = null;
+    AutomationsActions.CamControl camControl = null;
     AutomationsActions automations = null;
     // drive train motors
     public DcMotor frontLeft;
