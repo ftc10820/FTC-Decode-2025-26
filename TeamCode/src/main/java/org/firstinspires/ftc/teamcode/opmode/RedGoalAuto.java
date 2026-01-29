@@ -40,7 +40,7 @@ public class RedGoalAuto extends LinearOpMode {
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
         AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
 
 
         // Go to initial shooting position
