@@ -9,6 +9,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.camera.Camera;
 import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
@@ -69,53 +70,57 @@ public class LimelightCam implements Camera {
      * @return An ObjectInfo instance with calculated positional data.
      */
     private ObjectInfo processTarget(Object target, double targetHeightCm, String type) {
-
         LocalTime time = LocalTime.now();
-
         double totalDistance, lateralDistance, robotYawDeg, totalPitchDeg;
         int id;
         double targetXPixels, targetYPixels;
 
         if (target instanceof LLResultTypes.FiducialResult) {
             LLResultTypes.FiducialResult fiducial = (LLResultTypes.FiducialResult) target;
-            Pose3D targetPoseRobot = fiducial.getTargetPoseRobotSpace();
             id = fiducial.getFiducialId();
             targetXPixels = fiducial.getTargetXPixels();
             targetYPixels = fiducial.getTargetYPixels();
 
-            // Use the pre-calculated Pose3D from the Limelight
-            // Limelight Pose3D units are in meters; converting to CM
-            double forwardDistance = targetPoseRobot.getPosition().x * 100.0;
-            lateralDistance = targetPoseRobot.getPosition().y * 100.0;
 
-            totalDistance = Math.hypot(forwardDistance, lateralDistance);
-            robotYawDeg = Math.toDegrees(Math.atan2(lateralDistance, forwardDistance));
-            totalPitchDeg = targetPoseRobot.getOrientation().getPitch();
+            // 1. Replace manual math with built-in Pose3D data
+            // TargetPoseRobotSpace already calculates distance and angles based on your
+            // Camera-to-Robot mounting values set in the Limelight web UI.
+            Pose3D pose = fiducial.getTargetPoseRobotSpace();
 
-        } else if (target instanceof LLResultTypes.DetectorResult) {
-            LLResultTypes.DetectorResult detector = (LLResultTypes.DetectorResult) target;
-            id = (int) detector.getClassId();
-            targetXPixels = detector.getTargetXPixels();
-            targetYPixels = detector.getTargetYPixels();
+            // Pose components are in meters; convert to CM
+            lateralDistance = pose.getPosition().y * 100.0;
 
+            // Limelight provides the 3D distance and rotation directly
+            double norm = Math.sqrt(pose.getPosition().x * pose.getPosition().x + pose.getPosition().y * pose.getPosition().y + pose.getPosition().z * pose.getPosition().z);
+            totalDistance = norm * 100.0;
+            robotYawDeg = fiducial.getTargetXDegrees();
+            totalPitchDeg = pose.getOrientation().getPitch();
 
-            double cameraYawAngleDeg = detector.getTargetXDegrees();
-            double cameraPitchAngleDeg = detector.getTargetYDegrees();
-
-            totalPitchDeg = cameraTiltDeg + cameraPitchAngleDeg;
-            double totalPitchRad = Math.toRadians(totalPitchDeg);
-
-            double heightDifference = cameraHeightCm - targetHeightCm;
-            double forwardDistance = heightDifference / Math.tan(totalPitchRad);
-
-            double cameraYawRad = Math.toRadians(cameraYawAngleDeg);
-            double lateralDistanceFromCamera = forwardDistance * Math.tan(cameraYawRad);
-            lateralDistance = lateralDistanceFromCamera + this.cameraLateralOffsetCm;
-
-            totalDistance = Math.hypot(forwardDistance, lateralDistance);
-            robotYawDeg = Math.toDegrees(Math.atan2(lateralDistance, forwardDistance));
-
-        } else {
+       }
+//        else if (target instanceof LLResultTypes.DetectorResult) {
+//            LLResultTypes.DetectorResult detector = (LLResultTypes.DetectorResult) target;
+//            id = detector.getClassId();
+//            targetXPixels = detector.getTargetXPixels();
+//            targetYPixels = detector.getTargetYPixels();
+//
+//            // 2. Manual pose calculation for detectors
+//            // This utilizes the camera mounting parameters
+//            double cameraTiltRad = Math.toRadians(cameraTiltDeg);
+//            double verticalAngleRad = Math.toRadians(detector.);
+//            double horizontalAngleRad = Math.toRadians(detector.tx);
+//
+//            double forwardDistanceCm = (targetHeightCm - cameraHeightCm) / Math.tan(cameraTiltRad + verticalAngleRad);
+//            double lateralOffsetFromCamAxis = forwardDistanceCm * Math.tan(horizontalAngleRad);
+//            lateralDistance = lateralOffsetFromCamAxis + cameraLateralOffsetCm;
+//
+//            double heightDifference = targetHeightCm - cameraHeightCm;
+//            totalDistance = Math.sqrt(forwardDistanceCm*forwardDistanceCm + lateralOffsetFromCamAxis*lateralOffsetFromCamAxis + heightDifference*heightDifference);
+//
+//            robotYawDeg = detector.tx;
+//            totalPitchDeg = detector.ty;
+//
+//        }
+        else {
             throw new IllegalArgumentException("Unsupported target: " + target.getClass().getSimpleName());
         }
 
@@ -130,6 +135,7 @@ public class LimelightCam implements Camera {
                 time
         );
     }
+
 
 
     /**
@@ -220,13 +226,12 @@ public class LimelightCam implements Camera {
 
         // Create a vector representing the object's position relative to the robot.
         // Y is inverted because in RoadRunner, positive Y is to the robot's left.
-        double robotRelativeX = forwardDistanceIn;
         double robotRelativeY = -lateralDistanceIn;
 
         // Rotate the relative vector by the robot's current heading.
         double robotHeadingRad = currentPose.heading.log();
-        double fieldOffsetX = robotRelativeX * Math.cos(robotHeadingRad) - robotRelativeY * Math.sin(robotHeadingRad);
-        double fieldOffsetY = robotRelativeX * Math.sin(robotHeadingRad) + robotRelativeY * Math.cos(robotHeadingRad);
+        double fieldOffsetX = forwardDistanceIn * Math.cos(robotHeadingRad) - robotRelativeY * Math.sin(robotHeadingRad);
+        double fieldOffsetY = forwardDistanceIn * Math.sin(robotHeadingRad) + robotRelativeY * Math.cos(robotHeadingRad);
 
         // Add the rotated offset to the robot's current field position.
         double objectFieldX = currentPose.position.x + fieldOffsetX;

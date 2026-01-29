@@ -130,7 +130,7 @@ public class AutomationsActions {
 
         private static final double POS_INITIAL = 0.5;
         private static final double POS_ACTIVE = 0;
-        private static final double WAIT_TIME = 2.0; // Time for servo to actuate and ball to be shot
+        private static final double WAIT_TIME = 1.0; // Time for servo to actuate and ball to be shot
 
         public Transfer(HardwareMap hardwareMap) {
             this(hardwareMap, null);
@@ -402,13 +402,17 @@ public class AutomationsActions {
                         return false;
                     }
 
-
+                    Drive.localizer.update();
                     Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
                     packet.put("targetPose: ", targetPose.toString());
                     packet.put("currentPose: ", Drive.localizer.getPose().toString());
+                    packet.put("turn deg",goalTag.yaw);
                     Drive.localizer.update();
                     trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
-                            .turnTo(Math.toRadians(-1*Math.atan((targetPose.position.x - Drive.localizer.getPose().position.x)/(targetPose.position.y - Drive.localizer.getPose().position.y))))
+
+
+                         .turn(Math.toRadians(goalTag.yaw))
+
                             .build();
 
                     initialized = true;

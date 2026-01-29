@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
 import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.Arrays;
 
@@ -30,10 +32,10 @@ public class RedGoalAuto extends LinearOpMode {
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         AutomationsActions actions = new AutomationsActions();
-        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
 
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
+
+        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 20);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
@@ -43,8 +45,9 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(20)
+                .lineToX(30)
                 .build();
+
 
 
 
@@ -53,12 +56,11 @@ public class RedGoalAuto extends LinearOpMode {
         waitForStart();
 
         if (isStopRequested()) return;
-        Actions.runBlocking(new SequentialAction(tab1,hlServo.lookRight(),new SleepAction(1)));
 
-       
+        Actions.runBlocking(tab1);
+        Actions.runBlocking(new SequentialAction(hlServo.lookRight(),new SleepAction(0.3)));
+
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
-        sleep(500);
-        drive.localizer.update();
         Actions.runBlocking(hlServo.lookForward());
         ObjectInfo goalTag;
         for (;;){
@@ -69,18 +71,17 @@ public class RedGoalAuto extends LinearOpMode {
 
             }
         }
+        Actions.runBlocking(camControl.autoAlignGoal(goalTag));
+        drive.localizer.update();
+
+        sleep(300);
+        drive.localizer.update();
+        Actions.runBlocking(hlServo.lookForward());
+
         //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
-        ObjectInfo target;
-        for (;;){
-            try{
-            target = cam.scanTag().get(0);
-            break;
-            } catch (Exception e){
 
-            }
-        }
-        sleep(500);
+
         Actions.runBlocking(new SequentialAction(shooter.spinUp(), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
