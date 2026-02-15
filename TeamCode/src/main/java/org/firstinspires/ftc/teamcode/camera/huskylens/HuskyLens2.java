@@ -144,6 +144,25 @@ public class HuskyLens2 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
         this.deviceClient.setI2cAddress(I2cAddr.create7bit(i2cAddress));
     }
 
+    /**
+     * (Re)initializes the connection to the HuskyLens using the current I2C address.
+     * @return true if the knock was successful, false otherwise.
+     */
+    public boolean init() {
+        return knock();
+    }
+
+    /**
+     * Sets a new I2C address for the HuskyLens and verifies the connection.
+     * This is useful if the HuskyLens is not at the default address and initialization failed.
+     * @param i2cAddress The new 7-bit I2C address for the HuskyLens.
+     * @return true if the knock was successful, false otherwise.
+     */
+    public boolean init(int i2cAddress) {
+        this.deviceClient.setI2cAddress(I2cAddr.create7bit(i2cAddress));
+        return knock();
+    }
+
     @Override
     public Manufacturer getManufacturer() {
         return Manufacturer.DFRobot;
@@ -317,23 +336,7 @@ public class HuskyLens2 extends I2cDeviceSynchDevice<I2cDeviceSynch> {
                 this.name = new String(Arrays.copyOfRange(buf, CONTENT_INDEX + 11, CONTENT_INDEX + 11 + nameLength), StandardCharsets.UTF_8);
             }
             if (contentLength > 0) {
-                this.content = new String(Arrays.copyOfRange(buf, CONTENT_INDEX + 12 + nameLength, CONTENT_INDEX + 12 + nameLength + contentLength), StandardCharsets.UTF_8);
-            }
-
-            // Assign union-like fields based on algorithm
-            switch (algo) {
-                case ALGORITHM_LINE_TRACKING:
-                    this.xTarget = first;
-                    this.yTarget = second;
-                    this.angle = third;
-                    this.length = fourth;
-                    break;
-                default:
-                    this.xCenter = first;
-                    this.yCenter = second;
-                    this.width = third;
-                    this.height = fourth;
-                    break;
+                this.content = new String(Arrays.copyOfRange(buf, CONTENT_INDEX + 11 + nameLength, CONTENT_INDEX + 11 + nameLength + contentLength), StandardCharsets.UTF_8);
             }
         }
     }

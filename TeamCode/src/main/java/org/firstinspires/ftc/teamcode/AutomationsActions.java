@@ -8,9 +8,11 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -101,7 +103,7 @@ public class AutomationsActions {
         }
 
         public double getRPMFromDistance(ObjectInfo objectInfo) {
-            return getRPMFromDistance(objectInfo.distance, objectInfo.realHeight - 25);
+            return getRPMFromDistance(objectInfo.distance, objectInfo.realHeight+48);
         }
 
         public Action spinUp(double rpm) {
@@ -118,6 +120,36 @@ public class AutomationsActions {
 
     }
 
+    public class Intake{
+        private final DcMotorEx intake;
+        public Intake(HardwareMap hardwareMap) {
+            intake = hardwareMap.get(DcMotorEx.class, "intake");
+        }
+        public class IntakeAction implements Action {
+            private boolean initialized = false;
+            private final double power;
+            public IntakeAction(double power) {
+                this.power = power;
+            }
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    intake.setDirection(DcMotorSimple.Direction.REVERSE);
+                    initialized = true;
+
+                }
+                intake.setPower(power);
+                return false;
+            }
+        }
+        public Action intakeAction(double power) {
+            return new IntakeAction(power);
+        }
+
+
+    }
+
     public class Transfer {
         private final Servo transfer1, transfer2, transfer3;
         private final ColorSensor colorSensor1, colorSensor2, colorSensor3;
@@ -126,7 +158,7 @@ public class AutomationsActions {
         // The horizontal distance from the center of the robot to the left/right shooter shafts in cm.
         // This is the "opposite" side of our trigonometry triangle.
         // THIS VALUE NEEDS TO BE MEASURED AND TUNED ON YOUR ROBOT.
-        private static final double SHOOTER_OFFSET_CM = 13.97;
+        private static final double SHOOTER_OFFSET_CM = 5.75;
 
         private static final double POS_INITIAL = 0.5;
         private static final double POS_ACTIVE = 0;
@@ -405,14 +437,16 @@ public class AutomationsActions {
                     Drive.localizer.update();
                     Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
                     packet.put("targetPose: ", targetPose.toString());
+                    packet.put("lat dist in",goalTag.lateralDistance*0.3937);
                     packet.put("currentPose: ", Drive.localizer.getPose().toString());
+
                     packet.put("turn deg",goalTag.yaw);
                     Drive.localizer.update();
-                    trajectoryAction = Drive.actionBuilder(Drive.localizer.getPose())
+                    Pose2d currentPose = Drive.localizer.getPose();
 
-
+                    trajectoryAction = Drive.actionBuilder(currentPose)
                          .turn(Math.toRadians(goalTag.yaw))
-
+                           // .strafeTo(new Vector2d(currentPose.position.x,currentPose.position.y-(goalTag.lateralDistance*0.3937)))
                             .build();
 
                     initialized = true;
