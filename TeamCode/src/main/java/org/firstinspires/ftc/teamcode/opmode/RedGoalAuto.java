@@ -48,7 +48,7 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(25)
+                .lineToX(20)
                 .build();
 
 

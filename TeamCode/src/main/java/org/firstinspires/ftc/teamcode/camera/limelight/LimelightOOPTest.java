@@ -72,7 +72,7 @@ public class LimelightOOPTest extends LinearOpMode {
 
 
         while(opModeIsActive()) {
-            List<ObjectInfo> objects = camera.scanTag();
+            List<ObjectInfo> objects = camera.scanAll();
             multiTelemetry("Limelight>>",objects.toString());
 
             telemetry.update();

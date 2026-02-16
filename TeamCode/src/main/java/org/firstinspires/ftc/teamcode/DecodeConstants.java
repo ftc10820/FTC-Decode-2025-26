@@ -5,7 +5,7 @@ public class DecodeConstants {
     // Shooter constants
     public static final double FLYWHEEL_RADIUS_CM = 5.0;
     public static final double LAUNCH_ANGLE_DEGREES = 55.0;
-    public static final double SHOOTER_EFFICIENCY = 0.55;
+    public static final double SHOOTER_EFFICIENCY = 0.56;
     public static final double LAUNCH_HEIGHT_CM = 20.0;
 
     // CamControl Servo constants

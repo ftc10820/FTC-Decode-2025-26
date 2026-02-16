@@ -55,7 +55,7 @@ public class LimelightCam implements Camera {
         this.cameraLateralOffsetCm = cameraLateralOffsetCm;
 
 
-        heightOfGameElements.put("specimen", 5.0); // Example height in cm
+        heightOfGameElements.put("ball-trio", 12.7); // Example height in cm
         heightOfGameElements.put("apriltag", 15.24); // Example height for AprilTag centers in cm
     }
 
@@ -81,45 +81,41 @@ public class LimelightCam implements Camera {
             targetXPixels = fiducial.getTargetXPixels();
             targetYPixels = fiducial.getTargetYPixels();
 
-
-            // 1. Replace manual math with built-in Pose3D data
-            // TargetPoseRobotSpace already calculates distance and angles based on your
-            // Camera-to-Robot mounting values set in the Limelight web UI.
             Pose3D pose = fiducial.getTargetPoseRobotSpace();
-
-            // Pose components are in meters; convert to CM
             lateralDistance = pose.getPosition().y * 100.0;
 
-            // Limelight provides the 3D distance and rotation directly
-            double norm = Math.sqrt(pose.getPosition().x * pose.getPosition().x + pose.getPosition().y * pose.getPosition().y + pose.getPosition().z * pose.getPosition().z);
+            double norm = Math.sqrt(Math.pow(pose.getPosition().x, 2) + Math.pow(pose.getPosition().y, 2) + Math.pow(pose.getPosition().z, 2));
             totalDistance = norm * 100.0;
             robotYawDeg = fiducial.getTargetXDegrees();
-            totalPitchDeg = pose.getOrientation().getPitch();
+            totalPitchDeg = (double) pose.getOrientation().getPitch();
+        }
+        else if (target instanceof LLResultTypes.DetectorResult) {
+            LLResultTypes.DetectorResult detector = (LLResultTypes.DetectorResult) target;
 
-       }
-//        else if (target instanceof LLResultTypes.DetectorResult) {
-//            LLResultTypes.DetectorResult detector = (LLResultTypes.DetectorResult) target;
-//            id = detector.getClassId();
-//            targetXPixels = detector.getTargetXPixels();
-//            targetYPixels = detector.getTargetYPixels();
-//
-//            // 2. Manual pose calculation for detectors
-//            // This utilizes the camera mounting parameters
-//            double cameraTiltRad = Math.toRadians(cameraTiltDeg);
-//            double verticalAngleRad = Math.toRadians(detector.);
-//            double horizontalAngleRad = Math.toRadians(detector.tx);
-//
-//            double forwardDistanceCm = (targetHeightCm - cameraHeightCm) / Math.tan(cameraTiltRad + verticalAngleRad);
-//            double lateralOffsetFromCamAxis = forwardDistanceCm * Math.tan(horizontalAngleRad);
-//            lateralDistance = lateralOffsetFromCamAxis + cameraLateralOffsetCm;
-//
-//            double heightDifference = targetHeightCm - cameraHeightCm;
-//            totalDistance = Math.sqrt(forwardDistanceCm*forwardDistanceCm + lateralOffsetFromCamAxis*lateralOffsetFromCamAxis + heightDifference*heightDifference);
-//
-//            robotYawDeg = detector.tx;
-//            totalPitchDeg = detector.ty;
-//
-//        }
+            // Detector classes use ClassId; target pixels are at the center of the box
+            id = (int) detector.getClassId();
+            targetXPixels = 0; // DetectorResult doesn't expose raw pixels easily, usually tx/ty is preferred
+            targetYPixels = 0;
+
+            // Manual pose calculation using trigonometry
+            double cameraTiltRad = Math.toRadians(cameraTiltDeg);
+            double verticalAngleRad = Math.toRadians(detector.getTargetYDegrees());
+            double horizontalAngleRad = Math.toRadians(detector.getTargetXDegrees());
+
+            // Calculate forward distance on the ground plane
+            double heightDifference = targetHeightCm - cameraHeightCm;
+            double forwardDistanceCm = heightDifference / Math.tan(cameraTiltRad + verticalAngleRad);
+
+            // Calculate lateral offset from the camera's center line
+            double lateralOffsetFromCamAxis = forwardDistanceCm * Math.tan(horizontalAngleRad);
+            lateralDistance = lateralOffsetFromCamAxis + cameraLateralOffsetCm;
+
+            // Pythagorean theorem for total straight-line distance
+            totalDistance = Math.sqrt(Math.pow(forwardDistanceCm, 2) + Math.pow(lateralOffsetFromCamAxis, 2) + Math.pow(heightDifference, 2));
+
+            robotYawDeg = detector.getTargetXDegrees();
+            totalPitchDeg = detector.getTargetYDegrees();
+        }
         else {
             throw new IllegalArgumentException("Unsupported target: " + target.getClass().getSimpleName());
         }
@@ -135,6 +131,7 @@ public class LimelightCam implements Camera {
                 time
         );
     }
+
 
 
 
@@ -175,8 +172,8 @@ public class LimelightCam implements Camera {
      * @return A list of detected and processed objects.
      */
     public List<ObjectInfo> scanColor() {
-        final int pipelineIndex = 1; // ASSUMPTION: Pipeline 1 is for Specimens
-        final String objectType = "specimen";
+        final int pipelineIndex = 2;
+        final String objectType = "ball-trio";
 
         List<ObjectInfo> objects = Collections.synchronizedList(new ArrayList<>());
         Limelight3A cam = getCamera();
