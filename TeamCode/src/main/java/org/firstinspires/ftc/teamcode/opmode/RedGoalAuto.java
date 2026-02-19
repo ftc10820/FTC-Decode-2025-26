@@ -92,7 +92,7 @@ public class RedGoalAuto extends LinearOpMode {
                 e.printStackTrace();
             }
         }
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 

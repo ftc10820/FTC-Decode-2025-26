@@ -19,7 +19,9 @@ import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
 
 
 //
@@ -92,6 +94,7 @@ public class teleopRED extends LinearOpMode {
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
             hlservo = actions.new HuskyLensServo(hardwareMap);
+            LED = hardwareMap.get(Servo.class, "LED1");
 
             isUseCam = true;
             telemetry.addData("Debug", "cam detected, proceeding with");
@@ -172,6 +175,7 @@ public class teleopRED extends LinearOpMode {
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.Shooter shooterControl;
     public AutomationsActions.HuskyLensServo hlservo;
+    public Servo LED;
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
@@ -240,6 +244,7 @@ public class teleopRED extends LinearOpMode {
 
 
             driveMethod();
+            LED.setPosition(0);
 
 
             // These conditions change the state, which will persist.
@@ -313,14 +318,26 @@ public class teleopRED extends LinearOpMode {
 
             if (useFlywheel){
                 if (gamepad2.y){
-                    try {
-                        ObjectInfo target = camControl.Cam.scanTag().get(0);
-                        telemetry.addData("cam", target.toString());
-                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, 114.3);
+
+                        List<ObjectInfo> tags = camControl.Cam.scanTag();
+                        final ObjectInfo[] goalTag = new ObjectInfo[1];
+                        tags.forEach(tag -> {
+                            if (tag.objectID == 24){
+                                goalTag[0] = tag;
+                            }else {
+                                goalTag[0] = null;
+                            }
+
+
+                        });
+                        if (goalTag[0] != null){
+                        telemetry.addData("cam", goalTag[0].toString());
+                        double targetRPM = shooterControl.getRPMFromDistance(goalTag[0].distance, 114.3);
                         telemetry.addData("shooter target rpm", targetRPM);
                         telemetry.update();
                         Actions.runBlocking(shooterControl.spinUp(targetRPM));
-                    } catch (Exception e){
+                        LED.setPosition(1);
+                    } else{
                         telemetry.addData("cam","no tag detected");
 
                     }
@@ -328,7 +345,22 @@ public class teleopRED extends LinearOpMode {
                 if (gamepad2.a){
                     flywheel.setPower(0);
                 }
+                if (gamepad2.b){
+                    List<ObjectInfo> tags = camControl.Cam.scanTag();
+                    final ObjectInfo[] goalTag = new ObjectInfo[1];
+                    tags.forEach(tag -> {
+                        if (tag.objectID == 24){
+                            goalTag[0] = tag;
+                        }else {
+                            goalTag[0] = null;
+                        }
 
+
+                    });
+                    if (goalTag[0] != null){
+                        LED.setPosition(1);
+                    }
+                }
                 telemetry.addData("flywheel",flywheel.getVelocity()+", timestamp : "+ LocalTime.now());
 
             }

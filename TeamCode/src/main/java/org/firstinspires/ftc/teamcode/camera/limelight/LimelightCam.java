@@ -123,7 +123,7 @@ public class LimelightCam implements Camera {
         return new ObjectInfo(
                 (int) targetXPixels, (int) targetYPixels,
                 type, id,
-                totalDistance*1.376652+40,
+                totalDistance*1.376652+45,
                 lateralDistance,
                 robotYawDeg,
                 totalPitchDeg,
