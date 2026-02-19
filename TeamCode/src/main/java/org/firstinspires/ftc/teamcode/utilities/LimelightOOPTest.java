@@ -1,11 +1,14 @@
-package org.firstinspires.ftc.teamcode.camera.huskylens;
+package org.firstinspires.ftc.teamcode.utilities;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -28,9 +31,9 @@ import java.util.concurrent.TimeUnit;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "CamControl OOP Test", group = "Sensor")
-
-public class HuskyLensOOPTest extends LinearOpMode {
+@TeleOp(name = "Limelight OOP Test", group = "Sensor")
+@Disabled
+public class LimelightOOPTest extends LinearOpMode {
     void multiTelemetry(String caption, String value){
         telemetry.addData(caption,value);
         TelemetryPacket packet = new TelemetryPacket();
@@ -46,8 +49,10 @@ public class HuskyLensOOPTest extends LinearOpMode {
     @Override
     public void runOpMode()
     {
-        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-        HuskyLensCam camera = new HuskyLensCam(huskyLens, 317.98, 200, 29.21, 19.5);
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        LimelightCam camera = new LimelightCam(limelight, 317.98, 200, 29.21);
+        FtcDashboard.getInstance().startCameraStream(camera.getCamera(), 100);
+
 
 
         /*
@@ -69,8 +74,8 @@ public class HuskyLensOOPTest extends LinearOpMode {
 
 
         while(opModeIsActive()) {
-            List<ObjectInfo> objects = camera.scanTag();
-            multiTelemetry("CamControl>>",objects.toString());
+            List<ObjectInfo> objects = camera.scanAll();
+            multiTelemetry("Limelight>>",objects.toString());
 
             telemetry.update();
             sleep(3000);

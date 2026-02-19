@@ -1,9 +1,13 @@
-package org.firstinspires.ftc.teamcode.camera.huskylens;
+package org.firstinspires.ftc.teamcode.utilities;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLens2;
+
 @TeleOp
+@Disabled
 public class HuskyLens2Test extends LinearOpMode {
 
     @Override

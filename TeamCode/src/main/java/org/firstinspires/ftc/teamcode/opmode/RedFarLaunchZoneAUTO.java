@@ -1,179 +1,117 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
 // RR-specific imports
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
-import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
-
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.Arrays;
+import java.util.List;
 
-
-@Autonomous(name = "Red Far Launch Zone Autonomous", group = "Autonomous")
+@Config
+@Autonomous(name = "Red Far Launch Zone", group = "Autonomous")
 public class RedFarLaunchZoneAUTO extends LinearOpMode {
-    public void initialize() {
 
-        // Drivetrain motors
-        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
-        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
-        backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
-        backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
-
-        // Flywheel motor
-        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
-
-        // Intake motor
-        intake = hardwareMap.get(DcMotorEx.class, "intake");
-
-        // Transfer servos
-        transfer1 = hardwareMap.get(Servo.class,"transfer");
-        transfer2 = hardwareMap.get(Servo.class,"transfer2");
-        transfer3 = hardwareMap.get(Servo.class,"transfer3");
-
-        // Set motor power behaviors
-        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-    }
-
-    // Transfer servos
-    public Servo transfer1 = null;
-    public Servo transfer2 = null;
-    public Servo transfer3 = null;
-
-
-    // CamControl and automation actions
-    HuskyLens huskyLens = null;
-    HuskyLensCam cam = null;
-    AutomationsActions.CamControl camControl = null;
-    AutomationsActions automations = null;
-
-
-    // Drivetrain motors
-    public DcMotor frontLeft;
-    public DcMotor frontRight;
-    public DcMotor backLeft;
-    public DcMotor backRight;
-
-
-    // Intake and Flywheel motors
-    public DcMotorEx intake;
-
-    public DcMotorEx flywheel;
-
-
-    public final double TICKS_PER_REV = 28.0;
-    public final double FLYWHEEL_RPM = 2700;
-    public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
-    boolean useIntake = false;
-
-
+    // TODO: Similar to the OpModes, it would be a good idea to have all initialization/DCMotorExs, Servos, ColorSensors, Camera, etc.
+    // in a single class. I strongly recommend creating an abstract class that extends LinearOpMode which will be the parent class
+    // of your autonomous OpModes.
     @Override
-    public void runOpMode() throws InterruptedException {
-
-        // Set initial position for starting the match (Red Far Launch Zone)
-        Pose2d initialPose = new Pose2d(-63,-18, 0);
+    public void runOpMode() {
+        // instantiate your MecanumDrive at a particular pose.
+        Pose2d initialPose = new Pose2d(-63,-18, Math.PI);
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-
-        // Automation Actions and CamControl
         AutomationsActions actions = new AutomationsActions();
-        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
 
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
+
+
+        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 9);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
         AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
+        AutomationsActions.Intake intake = actions.new Intake(hardwareMap);
 
-        waitForStart();
-        double intakePower = 0;
 
-        // Code to set up and shoot the balls to score points in auto
+
+        // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .splineTo(new Vector2d(20,-20), Math.toRadians(-135))
+                .lineToX(-50.5)
                 .build();
+
+
+
+
+
+        Actions.runBlocking(hlServo.lookForward());
+        waitForStart();
+
+        if (isStopRequested()) return;
+        Actions.runBlocking(tab1);
+        AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        List<ObjectInfo> tags;
+        ObjectInfo goalTag = null;
+        searchForTag:
+        for (;;){
+            try {
+                tags = cam.scanTag();
+                for (ObjectInfo tag : tags){
+                if (tag.objectID == 24){
+                    goalTag = tag;
+                    break searchForTag;
+                }}
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
 
-        // Code to read the motif and get the correct shooting order
-        // Should shoot the balls in the correct shooting order
-        Actions.runBlocking(new SequentialAction(tab1, hlServo.lookRight()));
-        AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        sleep(300);
+        drive.localizer.update();
+
+
+        //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
+        drive.localizer.update();
+
+        for (;;){
+            try {
+                goalTag = cam.scanTag().get(0);
+                break;
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance+45,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
-
-        // Code to leave the launch zone
-        Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(0,0),Math.toRadians(-135)))
-                .splineTo(new Vector2d(28,-48),Math.toRadians(-180))
+        drive.localizer.update();
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance+45),shooter.spinUp(300)));
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .lineToX(49)
+                .turnTo(Math.PI)
                 .build();
-                // Get Intake Running
-                intakePower = -0.8; // Run forward
-        Actions.runBlocking(tab2);
-
-        if (useIntake) {
-            intake.setPower(intakePower);
+        while(opModeIsActive()) {
+            sleep(50);
         }
-
-        // Code to intake the balls
-        Action tab3 = drive.actionBuilder(new Pose2d(new Vector2d(0,-48),Math.toRadians(-180)))
-                .splineTo(new Vector2d(12,-48),Math.toRadians(-180))
-                .build();
-        Actions.runBlocking(tab3);
-
-        // Code to get into shooting position to launch the balls
-        Action tab4 = drive.actionBuilder(new Pose2d(new Vector2d(-12,-48),Math.toRadians(-180)))
-                .splineTo(new Vector2d(20,-20),Math.toRadians(-135))
-                .build();
-                // Get Intake to Stop
-                intakePower = 0; // Stop running
-        Actions.runBlocking(tab4);
-
-        // Get it to run the flywheel and shoot the balls following the motif
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
-
-        // Code to leave the launch zone for extra points at end of auto
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(20,-20),Math.toRadians(-135)))
-                .splineTo(new Vector2d(0,-24),Math.toRadians(-180))
-                .build();
-        Actions.runBlocking(tab5);
-
-        if (useIntake) {
-            intake.setPower(intakePower);
-        }
-
-        /* Action tab6 = drive.actionBuilder(new Pose2d(new Vector2d(9,-42.75),Math.toRadians(Math.atan(18.75/3))))
-                .splineTo(new Vector2d(12,-24), 45)
-                .build();
-        Actions.runBlocking(tab6);
-
-        // TODO: Make it shoot the ball
-
-        Action tab7 = drive.actionBuilder(new Pose2d(new Vector2d(12, -24),45))
-                .splineTo(new Vector2d(-24,-24), 0)
-                .build();
-        Actions.runBlocking(tab7);
-*/
-}}
+    }
+}

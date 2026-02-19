@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.camera.limelight;
 import static android.os.SystemClock.sleep;
 
 
-
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -12,7 +12,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.camera.Camera;
-import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.ArrayList;
@@ -88,6 +88,9 @@ public class LimelightCam implements Camera {
             totalDistance = norm * 100.0;
             robotYawDeg = fiducial.getTargetXDegrees();
             totalPitchDeg = (double) pose.getOrientation().getPitch();
+            TelemetryPacket packet = new TelemetryPacket();
+            packet.put("non corrected distance",totalDistance);
+            packet.put("corrected distance",totalDistance*1.376652+45);
         }
         else if (target instanceof LLResultTypes.DetectorResult) {
             LLResultTypes.DetectorResult detector = (LLResultTypes.DetectorResult) target;
@@ -123,7 +126,7 @@ public class LimelightCam implements Camera {
         return new ObjectInfo(
                 (int) targetXPixels, (int) targetYPixels,
                 type, id,
-                totalDistance*1.376652+45,
+                totalDistance*1.376652+35,
                 lateralDistance,
                 robotYawDeg,
                 totalPitchDeg,

@@ -18,9 +18,9 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
 
 import java.util.Arrays;
-
+//TODO: Update code with newer changes
 @Config
-@Autonomous(name = "BLUE_GOAL_AUTO", group = "Autonomous")
+@Autonomous(name = "Blue Goal Auto", group = "Autonomous")
 public class BlueGoalAuto extends LinearOpMode {
 
     @Override
