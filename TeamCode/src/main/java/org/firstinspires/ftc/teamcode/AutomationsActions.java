@@ -102,6 +102,37 @@ public class AutomationsActions {
             return term1 * sqrtTerm;
         }
 
+        public double getEfficiencyFactor(double currentRpm, double distanceInCm, double targetHeightInCm) {
+            double R = distanceInCm / 100.0;
+            double yt = targetHeightInCm / 100.0;
+            final double g = 9.81;
+
+            double r = DecodeConstants.FLYWHEEL_RADIUS_CM / 100.0;
+            double theta = Math.toRadians(DecodeConstants.LAUNCH_ANGLE_DEGREES);
+            double y0 = DecodeConstants.LAUNCH_HEIGHT_CM / 100.0;
+
+            if (currentRpm == 0) {
+                return 0.0;
+            }
+
+            double term1 = 60.0 / (Math.PI * r * currentRpm);
+
+            double cosTheta = Math.cos(theta);
+            double tanTheta = Math.tan(theta);
+
+            double numerator = g * R * R;
+            double denominator = 2 * cosTheta * cosTheta * (R * tanTheta - (yt - y0));
+
+            if (denominator <= 0) {
+                return 0.0;
+            }
+
+            double sqrtTerm = Math.sqrt(numerator / denominator);
+
+            return term1 * sqrtTerm;
+        }
+
+
         public double getRPMFromDistance(ObjectInfo objectInfo) {
             return getRPMFromDistance(objectInfo.distance, objectInfo.realHeight+48);
         }
@@ -284,11 +315,14 @@ public class AutomationsActions {
 
         private class RobotCentricShootingAction implements Action {
             private final int[] sequence;
-            private final Double distance;
-            private boolean initialized = false;
+            private final Double distance;private boolean initialized = false;
             private double startHeading = 0;
             private Action currentAction = null;
             private int sequenceIndex = 0;
+            // Define a default distance to use for angle calculations if none is provided.
+            // This ensures the robot still turns. Adjust this value based on typical shooting distances.
+            private static final double DEFAULT_SHOOTING_DISTANCE_CM = 100.0;
+
 
             RobotCentricShootingAction(BallColor[] shootingOrder, Double distance) {
                 this.distance = distance;
@@ -320,7 +354,9 @@ public class AutomationsActions {
 
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                if (drive == null || distance == null) {
+                // We need the drive object to perform turns. If it's null, we can't proceed with turning logic.
+                if (drive == null) {
+                    // Fallback to sequential shooting without turning if drive is not available.
                     if (currentAction == null) {
                         List<Action> actions = new ArrayList<>();
                         for (int servoId : sequence) {
@@ -337,38 +373,49 @@ public class AutomationsActions {
                     initialized = true;
                 }
 
+                // If the current action (turn or shoot) is finished, clear it.
                 if (currentAction != null && !currentAction.run(packet)) {
-                    currentAction = null; // Previous action finished, clear it.
+                    currentAction = null;
                 }
 
+                // If there is no current action, create the next one in the sequence.
                 if (currentAction == null) {
                     if (sequenceIndex < sequence.length) {
-                        // Still shots to do
+                        // Get the servo ID for the current shot.
                         int servoId = sequence[sequenceIndex];
-                        // Calculate the turn angle based on distance
-                        double turnAngle = getAngleForServo(servoId, distance);
+
+                        // Determine the distance to use for angle calculation.
+                        double effectiveDistance = (distance != null) ? distance : DEFAULT_SHOOTING_DISTANCE_CM;
+
+                        // Calculate the turn angle required for this specific servo.
+                        double turnAngle = getAngleForServo(servoId, effectiveDistance);
                         double targetHeading = startHeading + turnAngle;
 
+                        // Update the robot's current pose.
                         drive.localizer.update();
+
+                        // Create a sequential action to first turn to the target heading, then shoot.
                         currentAction = new SequentialAction(
                                 drive.actionBuilder(drive.localizer.getPose()).turnTo(targetHeading).build(),
                                 new ShootAction(servoId)
                         );
                         sequenceIndex++;
                     } else if (sequenceIndex == sequence.length) {
-                        // Finished all shots, turn back to start
+                        // After all shots are fired, turn the robot back to its initial heading.
                         drive.localizer.update();
                         currentAction = drive.actionBuilder(drive.localizer.getPose()).turnTo(startHeading).build();
-                        sequenceIndex++; // Mark as done with turning back
+                        sequenceIndex++; // Increment to prevent this block from running again.
                     } else {
-                        // All done
+                        // All actions are complete.
                         return false;
                     }
                 }
 
-                return true; // Action is running or we've just queued a new one.
+                // The current action is still running.
+                return true;
             }
         }
+
     }
 
 
@@ -435,14 +482,16 @@ public class AutomationsActions {
                     }
 
                     Drive.localizer.update();
-                    Pose2d targetPose = Cam.getPoseOf(Drive.localizer.getPose(), goalTag);
+                    Pose2d currentPose = Drive.localizer.getPose();
+                    Pose2d targetPose = Cam.getPoseOf(currentPose, goalTag);
                     packet.put("targetPose: ", targetPose.toString());
                     packet.put("lat dist in",goalTag.lateralDistance*0.3937);
-                    packet.put("currentPose: ", Drive.localizer.getPose().toString());
-
+                    packet.put("currentPose: ", currentPose.toString());
                     packet.put("turn deg",goalTag.yaw);
-                    Drive.localizer.update();
-                    Pose2d currentPose = Drive.localizer.getPose();
+
+
+
+
 
                     trajectoryAction = Drive.actionBuilder(currentPose)
                          .turn(Math.toRadians(goalTag.yaw))

@@ -36,7 +36,7 @@ public class RedGoalAuto extends LinearOpMode {
 
 
 
-        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 20);
+        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 9);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
@@ -48,7 +48,7 @@ public class RedGoalAuto extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(20)
+                .lineToX(30)
                 .build();
 
 
@@ -111,7 +111,7 @@ public class RedGoalAuto extends LinearOpMode {
         Actions.runBlocking(new SequentialAction(tab3, intake.intakeAction(0)));
         drive.localizer.update();
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(24,24),Math.toRadians(45))
+                .strafeToLinearHeading(new Vector2d(24,-24),Math.PI)
                 .build();
         Actions.runBlocking(tab4);
         for (;;){

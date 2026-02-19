@@ -88,7 +88,7 @@ public class teleopRED extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
-            camControl =  actions.new CamControl(new LimelightCam(hardwareMap.get(Limelight3A.class, "limelight"),316.9,  41.91, 20),drive,"red");
+            camControl =  actions.new CamControl(new LimelightCam(hardwareMap.get(Limelight3A.class, "limelight"),316.9,  41.91, 9),drive,"red");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
             hlservo = actions.new HuskyLensServo(hardwareMap);
@@ -316,9 +316,9 @@ public class teleopRED extends LinearOpMode {
                     try {
                         ObjectInfo target = camControl.Cam.scanTag().get(0);
                         telemetry.addData("cam", target.toString());
-                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, target.realHeight-25);
+                        double targetRPM = shooterControl.getRPMFromDistance(target.distance, 114.3);
                         telemetry.addData("shooter target rpm", targetRPM);
-
+                        telemetry.update();
                         Actions.runBlocking(shooterControl.spinUp(targetRPM));
                     } catch (Exception e){
                         telemetry.addData("cam","no tag detected");

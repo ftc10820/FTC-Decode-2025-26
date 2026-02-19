@@ -53,6 +53,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.LED;
+import com.qualcomm.robotcore.hardware.Servo;
 
 
 @TeleOp(name = "Concept: RevLED", group = "Concept")
@@ -60,24 +61,30 @@ import com.qualcomm.robotcore.hardware.LED;
 public class ConceptRevLED extends OpMode {
 // ... inside your OpMode class
 
-    RevBlinkinLedDriver blinkinLedDriver;
+    Servo ledLeft;
+    Servo ledRight;
     RevBlinkinLedDriver.BlinkinPattern pattern;
 
     @Override
     public void init() {
         // Match the name "blinkin" to your hardware configuration
-        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "led");
+        ledLeft= hardwareMap.get(Servo.class, "LED1");
+        ledRight= hardwareMap.get(Servo.class, "LED2");
+
 
         // Set an initial pattern
-        pattern = RevBlinkinLedDriver.BlinkinPattern.RAINBOW_RAINBOW_PALETTE;
-        blinkinLedDriver.setPattern(pattern);
+
     }
 
     @Override
     public void loop() {
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+            ledLeft.setPosition(1);
+            ledRight.setPosition(0);
+
         sleep(1000);
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED);
+            ledLeft.setPosition(0);
+            ledRight.setPosition(1);
+
             sleep(1000);
         }
     }
