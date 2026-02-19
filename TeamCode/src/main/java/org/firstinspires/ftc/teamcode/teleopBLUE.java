@@ -24,6 +24,12 @@ import java.util.Arrays;
 //
 @TeleOp(name = "blue teleop")
 public class teleopBLUE extends LinearOpMode {
+    // TODO: It would help to put the initialize routine in a separate class in order to keep the code the initialization the same among OpModes
+    // This could be done several ways:
+    // Option 1. Create a Robot class that has all of the DcMotorExs, Servos, Camera, and ColorSensors and instantiate at the beginning of the OpMode
+    // Option 2. Create an abstract OpMode which extends LinearOpMode that has all of the init and DcMotorExs, Servos, ColorSensors, Camera, etc and extend all OpMode from your abstrawct class
+    // Option 3. Create a static class that has a static initialization routine and pass an OpMode to it
+    // Personally, I'm partial to Option 2.
     public void initialize() {
 
         // setting up drive train
@@ -87,6 +93,8 @@ public class teleopBLUE extends LinearOpMode {
         try{
             AutomationsActions actions = new AutomationsActions();
             drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
+// TODO: Any special reason why teleopBLUE is still on HuskyLens and not Limelight 3a?
+            // Again, this is a good reason to have all init and members in a common class and not copy/paste
             camControl =  actions.new CamControl(new HuskyLensCam(hardwareMap.get(HuskyLens.class, "huskylens"),316.9, 200, 41.91, 20, 10.16),drive,"blue");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
@@ -113,6 +121,10 @@ public class teleopBLUE extends LinearOpMode {
         }   }
 
 
+    // TODO: It might be even better to have an abstract teleop class that subclasses your abstract OpMode which has driveMethod.
+    // It can also have any other control methods common to red and blue teleop modes This way, the red and blue behavior is
+    // consistent across both OpModes. The only difference between them should be for automations and targets that differ between
+    // red and blue.
     void driveMethod() {
 
         double max;
@@ -171,6 +183,7 @@ public class teleopBLUE extends LinearOpMode {
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.Shooter shooterControl;
     public AutomationsActions.HuskyLensServo hlservo;
+// TODO: Please create a static class for Constants with public static final constant members that can be mutually referenced across classes
     public final double TICKS_PER_REV = 28;
     public final double FLYWHEEL_RPM = 2700;
     public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;

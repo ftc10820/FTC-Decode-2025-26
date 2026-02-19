@@ -27,6 +27,9 @@ import java.util.Arrays;
 @Autonomous(name = "RED_GOAL_AUTO", group = "Autonomous")
 public class RedGoalAuto extends LinearOpMode {
 
+    // TODO: Similar to the OpModes, it would be a good idea to have all initialization/DCMotorExs, Servos, ColorSensors, Camera, etc.
+    // in a single class. I strongly recommend creating an abstract class that extends LinearOpMode which will be the parent class
+    // of your autonomous OpModes.
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
