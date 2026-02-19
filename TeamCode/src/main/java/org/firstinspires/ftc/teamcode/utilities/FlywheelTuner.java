@@ -1,15 +1,17 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utilities;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 @TeleOp(name = "CamControl Tuning", group = "Tuning")
-public class flywheelTuner extends LinearOpMode {
+@Disabled
+public class FlywheelTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() {

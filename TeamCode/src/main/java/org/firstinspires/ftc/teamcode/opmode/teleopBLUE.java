@@ -1,5 +1,5 @@
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.opmode;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
@@ -14,8 +14,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.Arrays;

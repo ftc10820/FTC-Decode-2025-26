@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.utilities;
 
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
@@ -9,15 +9,18 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 // Non-RR imports
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-        import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 
 import java.util.List;
 
 @Config
 @Autonomous(name = "Move to AprilTag (test)", group = "Autonomous")
+@Disabled
 public class HuskyLensGoToApriltag extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

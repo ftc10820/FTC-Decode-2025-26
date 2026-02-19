@@ -11,6 +11,7 @@ import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.camera.Camera;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 import org.threeten.bp.LocalTime;
 
 import java.util.ArrayList;

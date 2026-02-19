@@ -8,7 +8,6 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -21,7 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.camera.Camera;
 import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
-import org.firstinspires.ftc.teamcode.camera.huskylens.ObjectInfo;
+import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.ArrayList;
@@ -452,7 +451,13 @@ public class AutomationsActions {
                 return new BallColor[]{BallColor.PURPLE, BallColor.PURPLE, BallColor.PURPLE};
             }
 
-            ObjectInfo tag = tags.get(0);
+            ObjectInfo tag = null;
+            for (ObjectInfo tagI : tags){
+                if (tagI.objectID != 24 && tagI.objectID != 25){
+                    tag = tagI;
+                    break;
+                }
+            }
             switch (tag.objectID) {
                 case 21:
                     return new BallColor[]{BallColor.GREEN, BallColor.PURPLE, BallColor.PURPLE};
