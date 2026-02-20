@@ -121,14 +121,14 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(300)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(600)));
         drive.localizer.update();
         Action tab2 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-67.2,-73),Math.toRadians(-90),new TranslationalVelConstraint(15.0))
                 .build();
         Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab2,new SleepAction(0.5),intake.intakeAction(0)));
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-55,-18),Math.toRadians(25))
+                .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(25))
                 .build();
         Actions.runBlocking(tab3);
         goalTag = null;
@@ -151,18 +151,18 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(300)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(600)));
         drive.localizer.update();
 
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-40,-48),0)
+                .strafeToLinearHeading(new Vector2d(-60,-48),0)
                 .build();
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-40,-48),0))
+        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-60,-48),0))
                 .lineToX(-24,new TranslationalVelConstraint(15.0))
                 .build();
         Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab4,tab5,intake.intakeAction(0)));
         Action tab6 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-63,-18),Math.toRadians(25))
+                .strafeToLinearHeading(new Vector2d(-63,-18),Math.PI-Math.toRadians(25))
                 .build();
         Actions.runBlocking(tab6);
         goalTag = null;
@@ -180,12 +180,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance+45,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance+45),shooter.spinUp(0)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(0)));
         drive.localizer.update();
 
 
