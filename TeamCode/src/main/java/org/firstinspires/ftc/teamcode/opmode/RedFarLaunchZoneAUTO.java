@@ -64,36 +64,117 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         if (isStopRequested()) return;
         Actions.runBlocking(tab1);
+        telemetry.addLine("went forward");
+        telemetry.update();
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
+        telemetry.addLine("got shooting order");
+        telemetry.update();
         List<ObjectInfo> tags;
         ObjectInfo goalTag = null;
-        searchForTag:
-        for (;;){
-            try {
-                tags = cam.scanTag();
-                for (ObjectInfo tag : tags){
-                if (tag.objectID == 24){
-                    goalTag = tag;
-                    break searchForTag;
-                }}
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-        Actions.runBlocking(camControl.autoAlignGoal(goalTag));
-        drive.localizer.update();
-
-        sleep(300);
-        drive.localizer.update();
+        Actions.runBlocking(drive.actionBuilder(drive.localizer.getPose()).turnTo(Math.PI-Math.toRadians(25)).build());
+        telemetry.addLine("turned");
+        telemetry.update();
+//        searchForTag:
+//        for (;;){
+//            try {
+//                tags = cam.scanTag();
+//                for (ObjectInfo tag : tags){
+//                if (tag.objectID == 24){
+//                    goalTag = tag;
+//                    break searchForTag;
+//                }}
+//            } catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//        Actions.runBlocking(camControl.autoAlignGoal(goalTag));
+//        telemetry.addLine("got goal tag");
+//        telemetry.update();
+//        drive.localizer.update();
+//
+//        sleep(300);
+//        drive.localizer.update();
 
 
         //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
 
+
+        goalTag = null;
+        searchForTag:
         for (;;){
             try {
-                goalTag = cam.scanTag().get(0);
-                break;
+                tags = cam.scanTag();
+                for (ObjectInfo tag : tags){
+                    if (tag.objectID == 24){
+                        goalTag = tag;
+                        break searchForTag;
+                    }}
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        telemetry.addLine("got goal tag again");
+        telemetry.update();
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
+        telemetry.update();
+
+        drive.localizer.update();
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(300)));
+        drive.localizer.update();
+        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(new Vector2d(-67.2,-73),Math.toRadians(-90),new TranslationalVelConstraint(15.0))
+                .build();
+        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab2,new SleepAction(0.5),intake.intakeAction(0)));
+        Action tab3 = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(new Vector2d(-55,-18),Math.toRadians(25))
+                .build();
+        Actions.runBlocking(tab3);
+        goalTag = null;
+        searchForTag:
+        for (;;){
+            try {
+                tags = cam.scanTag();
+                for (ObjectInfo tag : tags){
+                    if (tag.objectID == 24){
+                        goalTag = tag;
+                        break searchForTag;
+                    }}
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
+        telemetry.update();
+
+        drive.localizer.update();
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(300)));
+        drive.localizer.update();
+
+        Action tab4 = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(new Vector2d(-40,-48),0)
+                .build();
+        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-40,-48),0))
+                .lineToX(-24,new TranslationalVelConstraint(15.0))
+                .build();
+        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab4,tab5,intake.intakeAction(0)));
+        Action tab6 = drive.actionBuilder(drive.localizer.getPose())
+                .strafeToLinearHeading(new Vector2d(-63,-18),Math.toRadians(25))
+                .build();
+        Actions.runBlocking(tab6);
+        goalTag = null;
+        searchForTag:
+        for (;;){
+            try {
+                tags = cam.scanTag();
+                for (ObjectInfo tag : tags){
+                    if (tag.objectID == 24){
+                        goalTag = tag;
+                        break searchForTag;
+                    }}
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -104,12 +185,10 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance+45),shooter.spinUp(300)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance+45),shooter.spinUp(0)));
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .lineToX(49)
-                .turnTo(Math.PI)
-                .build();
+
+
         while(opModeIsActive()) {
             sleep(50);
         }
