@@ -25,6 +25,7 @@ public class BlueGoalAuto extends TeamLinearOpMode {
 
     @Override
     public void runOpMode() {
+        initialize();
         // instantiate your MecanumDrive at a particular pose.
         Pose2d initialPose = new Pose2d(53, 53, Math.toRadians(-135));
 
