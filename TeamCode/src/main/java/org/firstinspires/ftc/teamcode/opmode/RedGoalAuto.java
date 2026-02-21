@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
-import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.Arrays;
 
@@ -29,12 +28,6 @@ public class RedGoalAuto extends TeamLinearOpMode {
         // instantiate your MecanumDrive at a particular pose.
         initialize();
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
-        AutomationsActions actions = new AutomationsActions();
-
-        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
-        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
-        AutomationsActions.Intake intake = actions.new Intake(hardwareMap);
 
 
 
@@ -52,11 +45,11 @@ public class RedGoalAuto extends TeamLinearOpMode {
 
         if (isStopRequested()) return;
 
-        Actions.runBlocking(new ParallelAction(tab1,shooter.spinUp(300)));
-        Actions.runBlocking(new SequentialAction(hlServo.lookRight(),new SleepAction(0.3)));
+        Actions.runBlocking(new ParallelAction(tab1,shooterControl.spinUp(300)));
+        Actions.runBlocking(new SequentialAction(hlservo.lookRight(),new SleepAction(0.3)));
 
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
-        Actions.runBlocking(hlServo.lookForward());
+        Actions.runBlocking(hlservo.lookForward());
         ObjectInfo goalTag;
         for (;;){
             try {
@@ -71,7 +64,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
 
         sleep(300);
         drive.localizer.update();
-        Actions.runBlocking(hlServo.lookForward());
+        Actions.runBlocking(hlservo.lookForward());
 
         //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
@@ -85,23 +78,23 @@ public class RedGoalAuto extends TeamLinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(300)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(300)));
         drive.localizer.update();
         Action tab2 = drive.actionBuilder(drive.localizer.getPose())
                 .lineToX(49)
                 .turnTo(Math.PI)
                 .build();
-        Actions.runBlocking(new SequentialAction(tab2, intake.intakeAction(0.9)));
+        Actions.runBlocking(new SequentialAction(tab2, intakeControl.intakeAction(0.9)));
         drive.localizer.update();
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
                 .lineToX(0,new TranslationalVelConstraint(30.0))
                 .build();
-        Actions.runBlocking(new SequentialAction(tab3, intake.intakeAction(0)));
+        Actions.runBlocking(new SequentialAction(tab3, intakeControl.intakeAction(0)));
         drive.localizer.update();
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(24,-24),Math.PI-Math.toRadians(45),new TranslationalVelConstraint(30.0))
@@ -121,7 +114,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
 
         sleep(300);
         drive.localizer.update();
-        Actions.runBlocking(hlServo.lookForward());
+        Actions.runBlocking(hlservo.lookForward());
 
         //Actions.runBlocking(camControl.autoAlignGoal(goalTag));
         drive.localizer.update();
@@ -134,9 +127,9 @@ public class RedGoalAuto extends TeamLinearOpMode {
                 e.printStackTrace();
             }
         }
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(0)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(0)));
         drive.localizer.update();
         telemetry.update();
 

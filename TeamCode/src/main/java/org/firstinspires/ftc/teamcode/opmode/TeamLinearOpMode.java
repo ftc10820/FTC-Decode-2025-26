@@ -39,6 +39,7 @@ public abstract class TeamLinearOpMode extends LinearOpMode {
     public AutomationsActions.CamControl camControl;
     public AutomationsActions.Transfer transferControl;
     public AutomationsActions.Shooter shooterControl;
+    public AutomationsActions.Intake intakeControl;
     public AutomationsActions.HuskyLensServo hlservo;
     public Servo LED;
     public final double TICKS_PER_REV = 28;
@@ -129,6 +130,7 @@ public abstract class TeamLinearOpMode extends LinearOpMode {
             camControl =  actions.new CamControl(new LimelightCam(hardwareMap.get(Limelight3A.class, "limelight"),316.9,  41.91, 9),drive,"red");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);
+            intakeControl = actions.new Intake(hardwareMap);
             hlservo = actions.new HuskyLensServo(hardwareMap);
             LED = hardwareMap.get(Servo.class, "LED1");
 

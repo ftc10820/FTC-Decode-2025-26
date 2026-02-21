@@ -25,12 +25,6 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
         // Set initial position for starting the match (Red Far Launch Zone)
         Pose2d initialPose = new Pose2d(-63,18, 0);
 
-        // Automation Actions and CamControl
-        AutomationsActions actions = new AutomationsActions();
-
-        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
-        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
         waitForStart();
         double intakePower = 0;
@@ -43,13 +37,13 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
 
         // Code to read the motif and get the correct shooting order
         // Should shoot the balls in the correct shooting order
-        Actions.runBlocking(new SequentialAction(tab1, hlServo.lookLeft()));
+        Actions.runBlocking(new SequentialAction(tab1, hlservo.lookLeft()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooterControl.spinUp())));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone and position to intake
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(0,0),Math.toRadians(135)))
@@ -78,8 +72,8 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
         Actions.runBlocking(tab4);
 
         // Get it to run the flywheel and shoot the balls following the motif
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooterControl.spinUp())));
+        Actions.runBlocking(new SequentialAction(transfergControl.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone for extra points at end of auto
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(20,-20),Math.toRadians(-135)))
