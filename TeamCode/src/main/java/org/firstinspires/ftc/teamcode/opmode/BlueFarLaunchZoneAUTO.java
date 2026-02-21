@@ -73,7 +73,7 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
 
         // Get it to run the flywheel and shoot the balls following the motif
         Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooterControl.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfergControl.doTransfer(shootingOrder)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone for extra points at end of auto
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(20,-20),Math.toRadians(-135)))
