@@ -28,11 +28,6 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         // instantiate your MecanumDrive at a particular pose.
         initialize();
         Pose2d initialPose = new Pose2d(-63,-18, Math.PI);
-        AutomationsActions actions = new AutomationsActions();
-        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
-        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
-        AutomationsActions.Intake intake = actions.new Intake(hardwareMap);
 
 
 
@@ -45,7 +40,7 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
 
 
 
-        Actions.runBlocking(hlServo.lookForward());
+        Actions.runBlocking(hlservo.lookForward());
         waitForStart();
 
         if (isStopRequested()) return;
@@ -102,18 +97,23 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         }
         telemetry.addLine("got goal tag again");
         telemetry.update();
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
+<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
+=======
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(600)));
+>>>>>>> 202567d (Unified action member names and initialization)
         drive.localizer.update();
 
         Action preIntake = drive.actionBuilder(drive.localizer.getPose())
                 .turnTo(Math.toRadians(-90))
                 .strafeTo(new Vector2d(-67.2, -40),new TranslationalVelConstraint(200))
                 .build();
+<<<<<<< HEAD
 
 
         Action finalMove = drive.actionBuilder(new Pose2d(-67.2, -40, Math.toRadians(-90)))
@@ -131,6 +131,9 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
 
         ));
 
+=======
+        Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.9),tab2,new SleepAction(0.5),intakeControl.intakeAction(0)));
+>>>>>>> 202567d (Unified action member names and initialization)
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(20),new TranslationalVelConstraint(100))
                 .build();
@@ -150,12 +153,16 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
+<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
+=======
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(600)));
+>>>>>>> 202567d (Unified action member names and initialization)
         drive.localizer.update();
 
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
@@ -164,7 +171,11 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-50,-53),0))
                 .lineToX(-24,new TranslationalVelConstraint(15.0))
                 .build();
+<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(intake.intakeAction(0.6),tab4,tab5));
+=======
+        Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.9),tab4,tab5,intakeControl.intakeAction(0)));
+>>>>>>> 202567d (Unified action member names and initialization)
         Action tab6 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(30),new TranslationalVelConstraint(200))
                 .build();
@@ -184,12 +195,12 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(0)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(0)));
         drive.localizer.update();
 
 
