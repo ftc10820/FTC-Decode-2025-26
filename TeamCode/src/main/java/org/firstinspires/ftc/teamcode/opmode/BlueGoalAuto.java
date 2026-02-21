@@ -21,21 +21,16 @@ import java.util.Arrays;
 //TODO: Update code with newer changes
 @Config
 @Autonomous(name = "Blue Goal Auto", group = "Autonomous")
-public class BlueGoalAuto extends LinearOpMode {
+public class BlueGoalAuto extends TeamLinearOpMode {
 
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
+        initialize();
         Pose2d initialPose = new Pose2d(53, 53, Math.toRadians(-135));
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         AutomationsActions actions = new AutomationsActions();
-        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-
-
-        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
 
