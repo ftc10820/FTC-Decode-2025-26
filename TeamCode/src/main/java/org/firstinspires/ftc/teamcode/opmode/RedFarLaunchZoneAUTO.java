@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.opmode;
 // RR-specific imports
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
@@ -102,18 +103,13 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(1300)));
-=======
-        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(600)));
->>>>>>> 7c6d6b3d1440b391cc04d29684e6bf19d2a4b082
         drive.localizer.update();
 
         Action preIntake = drive.actionBuilder(drive.localizer.getPose())
                 .turnTo(Math.toRadians(-90))
                 .strafeTo(new Vector2d(-67.2, -40),new TranslationalVelConstraint(200))
                 .build();
-<<<<<<< HEAD
 
 
         Action finalMove = drive.actionBuilder(new Pose2d(-67.2, -40, Math.toRadians(-90)))
@@ -131,9 +127,6 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
 
         ));
 
-=======
-        Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.9),tab2,new SleepAction(0.5),intakeControl.intakeAction(0)));
->>>>>>> 7c6d6b3d1440b391cc04d29684e6bf19d2a4b082
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(20),new TranslationalVelConstraint(100))
                 .build();
@@ -158,11 +151,7 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(1300)));
-=======
-        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(600)));
->>>>>>> 7c6d6b3d1440b391cc04d29684e6bf19d2a4b082
         drive.localizer.update();
 
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
@@ -171,11 +160,7 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-50,-53),0))
                 .lineToX(-24,new TranslationalVelConstraint(15.0))
                 .build();
-<<<<<<< HEAD
         Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.6),tab4,tab5));
-=======
-        Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.9),tab4,tab5,intakeControl.intakeAction(0)));
->>>>>>> 7c6d6b3d1440b391cc04d29684e6bf19d2a4b082
         Action tab6 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(30),new TranslationalVelConstraint(200))
                 .build();
