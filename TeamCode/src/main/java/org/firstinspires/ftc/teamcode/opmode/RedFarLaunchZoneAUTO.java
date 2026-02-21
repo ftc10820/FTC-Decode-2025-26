@@ -12,41 +12,23 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
-import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Config
 @Autonomous(name = "Red Far Launch Zone", group = "Autonomous")
-public class RedFarLaunchZoneAUTO extends LinearOpMode {
+public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
 
-    // TODO: Similar to the OpModes, it would be a good idea to have all initialization/DCMotorExs, Servos, ColorSensors, Camera, etc.
-    // in a single class. I strongly recommend creating an abstract class that extends LinearOpMode which will be the parent class
-    // of your autonomous OpModes.
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
+        initialize();
         Pose2d initialPose = new Pose2d(-63,-18, Math.PI);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-        AutomationsActions actions = new AutomationsActions();
-
-
-
-        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 9);
-
-        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
-        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
-        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
-        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
-        AutomationsActions.Intake intake = actions.new Intake(hardwareMap);
 
 
 
@@ -59,11 +41,11 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
 
 
-        Actions.runBlocking(hlServo.lookForward());
+        Actions.runBlocking(hlservo.lookForward());
         waitForStart();
 
         if (isStopRequested()) return;
-        Actions.runBlocking(new ParallelAction(shooter.spinUp(1300),tab1));
+        Actions.runBlocking(new ParallelAction(shooterControl.spinUp(1300),tab1));
         telemetry.addLine("went forward");
         telemetry.update();
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
@@ -77,7 +59,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 //        searchForTag:
 //        for (;;){
 //            try {
-//                tags = cam.scanTag();
+//                tags = camControl.Cam.scanTag();
 //                for (ObjectInfo tag : tags){
 //                if (tag.objectID == 24){
 //                    goalTag = tag;
@@ -104,7 +86,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         searchForTag:
         for (;;){
             try {
-                tags = cam.scanTag();
+                tags = camControl.Cam.scanTag();
                 for (ObjectInfo tag : tags){
                     if (tag.objectID == 24){
                         goalTag = tag;
@@ -116,12 +98,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         }
         telemetry.addLine("got goal tag again");
         telemetry.update();
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(1300)));
         drive.localizer.update();
 
         Action preIntake = drive.actionBuilder(drive.localizer.getPose())
@@ -139,7 +121,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
                 preIntake,
                 new ParallelAction(
                         finalMove,
-                        intake.intakeAction(0.6)
+                        intakeControl.intakeAction(0.6)
                 ),
                 new SleepAction(0.5)
 
@@ -148,12 +130,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(20),new TranslationalVelConstraint(100))
                 .build();
-        Actions.runBlocking(new SequentialAction(tab3,intake.intakeAction(0)));
+        Actions.runBlocking(new SequentialAction(tab3,intakeControl.intakeAction(0)));
         goalTag = null;
         searchForTag:
         for (;;){
             try {
-                tags = cam.scanTag();
+                tags = camControl.Cam.scanTag();
                 for (ObjectInfo tag : tags){
                     if (tag.objectID == 24){
                         goalTag = tag;
@@ -164,12 +146,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(1300)));
         drive.localizer.update();
 
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
@@ -178,16 +160,16 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-50,-53),0))
                 .lineToX(-24,new TranslationalVelConstraint(15.0))
                 .build();
-        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.6),tab4,tab5));
+        Actions.runBlocking(new SequentialAction(intakeControl.intakeAction(0.6),tab4,tab5));
         Action tab6 = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(30),new TranslationalVelConstraint(200))
                 .build();
-        Actions.runBlocking(new SequentialAction(tab6,intake.intakeAction(0)));
+        Actions.runBlocking(new SequentialAction(tab6,intakeControl.intakeAction(0)));
         goalTag = null;
         searchForTag:
         for (;;){
             try {
-                tags = cam.scanTag();
+                tags = camControl.Cam.scanTag();
                 for (ObjectInfo tag : tags){
                     if (tag.objectID == 24){
                         goalTag = tag;
@@ -198,12 +180,12 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
             }
         }
 
-        Actions.runBlocking(new SequentialAction(shooter.spinUp(shooter.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
+        Actions.runBlocking(new SequentialAction(shooterControl.spinUp(shooterControl.getRPMFromDistance(goalTag.distance,114.3)), new SleepAction(2)));
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(0)));
+        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder,goalTag.distance),shooterControl.spinUp(0)));
         drive.localizer.update();
 
 
