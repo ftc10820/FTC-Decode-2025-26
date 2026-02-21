@@ -52,7 +52,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)
-                .lineToX(-50.5)
+                .lineToX(-57)
                 .build();
 
 
@@ -63,7 +63,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         waitForStart();
 
         if (isStopRequested()) return;
-        Actions.runBlocking(tab1);
+        Actions.runBlocking(new ParallelAction(shooter.spinUp(1300),tab1));
         telemetry.addLine("went forward");
         telemetry.update();
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
@@ -71,7 +71,7 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
         List<ObjectInfo> tags;
         ObjectInfo goalTag = null;
-        Actions.runBlocking(drive.actionBuilder(drive.localizer.getPose()).turnTo(Math.PI-Math.toRadians(25)).build());
+        Actions.runBlocking(drive.actionBuilder(drive.localizer.getPose()).turnTo(Math.PI-Math.toRadians(20)).build());
         telemetry.addLine("turned");
         telemetry.update();
 //        searchForTag:
@@ -121,16 +121,34 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(600)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
         drive.localizer.update();
-        Action tab2 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-67.2,-73),Math.toRadians(-90),new TranslationalVelConstraint(15.0))
+
+        Action preIntake = drive.actionBuilder(drive.localizer.getPose())
+                .turnTo(Math.toRadians(-90))
+                .strafeTo(new Vector2d(-67.2, -40),new TranslationalVelConstraint(200))
                 .build();
-        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab2,new SleepAction(0.5),intake.intakeAction(0)));
+
+
+        Action finalMove = drive.actionBuilder(new Pose2d(-67.2, -40, Math.toRadians(-90)))
+                .lineToY(-70,new TranslationalVelConstraint(15.0))
+                .build();
+
+
+        Actions.runBlocking(new SequentialAction(
+                preIntake,
+                new ParallelAction(
+                        finalMove,
+                        intake.intakeAction(0.6)
+                ),
+                new SleepAction(0.5)
+
+        ));
+
         Action tab3 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(25))
+                .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(20),new TranslationalVelConstraint(100))
                 .build();
-        Actions.runBlocking(tab3);
+        Actions.runBlocking(new SequentialAction(tab3,intake.intakeAction(0)));
         goalTag = null;
         searchForTag:
         for (;;){
@@ -151,20 +169,20 @@ public class RedFarLaunchZoneAUTO extends LinearOpMode {
         telemetry.update();
 
         drive.localizer.update();
-        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(600)));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder,goalTag.distance),shooter.spinUp(1300)));
         drive.localizer.update();
 
         Action tab4 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-60,-48),0)
+                .strafeToLinearHeading(new Vector2d(-50,-53),0,new TranslationalVelConstraint(200))
                 .build();
-        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-60,-48),0))
+        Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(-50,-53),0))
                 .lineToX(-24,new TranslationalVelConstraint(15.0))
                 .build();
-        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.9),tab4,tab5,intake.intakeAction(0)));
+        Actions.runBlocking(new SequentialAction(intake.intakeAction(0.6),tab4,tab5));
         Action tab6 = drive.actionBuilder(drive.localizer.getPose())
-                .strafeToLinearHeading(new Vector2d(-63,-18),Math.PI-Math.toRadians(25))
+                .strafeToLinearHeading(new Vector2d(-55,-18),Math.PI-Math.toRadians(30),new TranslationalVelConstraint(200))
                 .build();
-        Actions.runBlocking(tab6);
+        Actions.runBlocking(new SequentialAction(tab6,intake.intakeAction(0)));
         goalTag = null;
         searchForTag:
         for (;;){

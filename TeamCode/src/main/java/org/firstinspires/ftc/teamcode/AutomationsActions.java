@@ -221,16 +221,28 @@ public class AutomationsActions {
                 default: return BallColor.NONE;
             }
 
-            if (((DistanceSensor) sensor).getDistance(DistanceUnit.CM) > 3.47) {
-                return BallColor.NONE;
-            }
-
             double greenValue = Math.max(1, sensor.green());
             double redValue = Math.max(1, sensor.red());
             double blueValue = Math.max(1, sensor.blue());
 
-            boolean isGreen = greenValue > redValue && greenValue > blueValue && greenValue > 100;
-            boolean isPurple = blueValue > redValue && blueValue > greenValue && blueValue > 100;
+            double totalColor = Math.max(1, redValue + greenValue + blueValue);
+            double normalizedRed = (redValue / totalColor) * 255;
+            double normalizedGreen = (greenValue / totalColor) * 255;
+            double normalizedBlue = (blueValue / totalColor) * 255;
+
+            final double DOMINANCE_THRESHOLD = 1.2;
+
+
+            final double BRIGHTNESS_THRESHOLD = 50.0; // Check against total color intensity
+
+            boolean isGreen = (normalizedGreen > normalizedRed * DOMINANCE_THRESHOLD) &&
+                    (normalizedGreen > normalizedBlue * DOMINANCE_THRESHOLD) &&
+                    (greenValue > BRIGHTNESS_THRESHOLD);
+
+            boolean isPurple = (normalizedBlue > normalizedGreen * DOMINANCE_THRESHOLD) &&
+                    (normalizedRed > normalizedGreen * DOMINANCE_THRESHOLD / 2) &&
+                    (blueValue > BRIGHTNESS_THRESHOLD);
+
 
             if (isGreen) {
                 return BallColor.GREEN;

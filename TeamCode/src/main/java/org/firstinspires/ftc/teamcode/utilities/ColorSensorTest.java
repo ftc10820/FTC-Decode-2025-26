@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 
 @TeleOp
-@Disabled
+
 public class ColorSensorTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
