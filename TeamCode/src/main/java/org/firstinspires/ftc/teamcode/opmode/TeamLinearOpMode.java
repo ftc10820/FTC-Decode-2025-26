@@ -64,7 +64,7 @@ public abstract class TeamLinearOpMode extends LinearOpMode {
 
     public abstract void runOpMode() throws InterruptedException;
 
-    public void initialize() {
+    public void initialize(Pose2d initialPose) {
 
         // setting up drive train
         try {
@@ -126,7 +126,8 @@ public abstract class TeamLinearOpMode extends LinearOpMode {
         }
         try{
             AutomationsActions actions = new AutomationsActions();
-            drive = new MecanumDrive(hardwareMap,new Pose2d(0,0,0));
+            if (initialPose == null) { initialPose = new Pose2d(0,0,0); }
+            drive = new MecanumDrive(hardwareMap,initialPose);
             camControl =  actions.new CamControl(new LimelightCam(hardwareMap.get(Limelight3A.class, "limelight"),316.9,  41.91, 9),drive,"red");
             transferControl = actions.new Transfer(hardwareMap, drive);
             shooterControl = actions.new Shooter(hardwareMap);

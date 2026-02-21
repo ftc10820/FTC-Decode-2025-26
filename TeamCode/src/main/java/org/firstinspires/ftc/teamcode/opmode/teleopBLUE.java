@@ -16,7 +16,7 @@ import java.util.Arrays;
 @TeleOp(name = "blue teleop")
 public class teleopBLUE extends TeamTeleopMode {
     public void runOpMode() throws InterruptedException {
-        initialize();
+        initialize(null);
 
         //pivot encoder homing
         Actions.runBlocking(hlservo.lookForward());

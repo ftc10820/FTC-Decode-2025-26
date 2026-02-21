@@ -18,7 +18,7 @@ import java.util.List;
 @TeleOp(name = "red teleop")
 public class teleopRED extends TeamTeleopMode {
     public void runOpMode() throws InterruptedException {
-        initialize();
+        initialize(null);
 
         //pivot encoder homing
        Actions.runBlocking(hlservo.lookForward());

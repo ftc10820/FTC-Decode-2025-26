@@ -33,8 +33,8 @@ public class RedGoalAuto extends TeamLinearOpMode {
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
-        initialize();
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
+        initialize(initialPose);
 
         // Go to initial shooting position
         Action tab1 = drive.actionBuilder(initialPose)

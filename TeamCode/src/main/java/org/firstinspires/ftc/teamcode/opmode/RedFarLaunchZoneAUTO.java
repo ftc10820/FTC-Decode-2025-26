@@ -15,6 +15,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 
 import java.util.Arrays;
@@ -27,8 +28,8 @@ public class RedFarLaunchZoneAUTO extends TeamLinearOpMode {
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
-        initialize();
         Pose2d initialPose = new Pose2d(-63,-18, Math.PI);
+        initialize(initialPose);
 
 
 

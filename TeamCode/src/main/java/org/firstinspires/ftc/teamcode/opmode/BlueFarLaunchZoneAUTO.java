@@ -10,12 +10,14 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
 import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -30,8 +32,8 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Set initial position for starting the match (Red Far Launch Zone)
-        initialize();
         Pose2d initialPose = new Pose2d(-63,18, 0);
+        initialize(initialPose);
 
         waitForStart();
         double intakePower = 0;
