@@ -9,22 +9,101 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
+import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.camera.huskylens.HuskyLensCam;
+
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.Arrays;
 //TODO: Update code with newer changes
 
 @Autonomous(name = "Blue Far Launch Zone Autonomous", group = "Autonomous")
-public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
+public class BlueFarLaunchZoneAUTO extends LinearOpMode {
+    public void initialize() {
+
+        // Drivetrain motors
+        frontRight = hardwareMap.get(DcMotorEx.class, "rightFront");
+        frontLeft = hardwareMap.get(DcMotorEx.class, "leftFront");
+        backRight = hardwareMap.get(DcMotorEx.class, "rightBack");
+        backLeft = hardwareMap.get(DcMotorEx.class, "leftBack");
+
+        // Flywheel motor
+        flywheel = hardwareMap.get(DcMotorEx.class,"flywheel");
+
+        // Intake motor
+        intake = hardwareMap.get(DcMotorEx.class, "intake");
+
+        // Transfer servos
+        transfer1 = hardwareMap.get(Servo.class,"transfer");
+        transfer2 = hardwareMap.get(Servo.class,"transfer2");
+        transfer3 = hardwareMap.get(Servo.class,"transfer3");
+
+        // Set motor power behaviors
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        flywheel.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        flywheel.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    }
+
+    // Transfer servos
+    public Servo transfer1 = null;
+    public Servo transfer2 = null;
+    public Servo transfer3 = null;
+
+
+    // CamControl and automation actions
+    HuskyLens huskyLens = null;
+    HuskyLensCam cam = null;
+    AutomationsActions.CamControl camControl = null;
+    AutomationsActions automations = null;
+
+
+    // Drivetrain motors
+    public DcMotor frontLeft;
+    public DcMotor frontRight;
+    public DcMotor backLeft;
+    public DcMotor backRight;
+
+
+    // Intake and Flywheel motors
+    public DcMotorEx intake;
+
+    public DcMotorEx flywheel;
+
+
+    public final double TICKS_PER_REV = 28.0;
+    public final double FLYWHEEL_RPM = 2700;
+    public final double FLYWHEEL_TICKS_PER_REV = TICKS_PER_REV * FLYWHEEL_RPM / 60.0;
+    boolean useIntake = false;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
-        initialize();
 
         // Set initial position for starting the match (Red Far Launch Zone)
         Pose2d initialPose = new Pose2d(-63,18, 0);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
+        // Automation Actions and CamControl
+        AutomationsActions actions = new AutomationsActions();
+        HuskyLens huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
+
+        HuskyLensCam cam = new HuskyLensCam(huskyLens, 316.9, 200, 41.91, 20);
+
+        AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
+        AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
+        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "blue");
+        AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap);
 
         waitForStart();
         double intakePower = 0;
@@ -37,13 +116,13 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
 
         // Code to read the motif and get the correct shooting order
         // Should shoot the balls in the correct shooting order
-        Actions.runBlocking(new SequentialAction(tab1, hlservo.lookLeft()));
+        Actions.runBlocking(new SequentialAction(tab1, hlServo.lookLeft()));
         AutomationsActions.BallColor[] shootingOrder = camControl.getShootingOrder();
         telemetry.addData("Ball Order", Arrays.toString(shootingOrder));
         telemetry.update();
 
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooterControl.spinUp())));
-        Actions.runBlocking(new SequentialAction(transferControl.doTransfer(shootingOrder)));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone and position to intake
         Action tab2 = drive.actionBuilder(new Pose2d(new Vector2d(0,0),Math.toRadians(135)))
@@ -72,8 +151,8 @@ public class BlueFarLaunchZoneAUTO extends TeamLinearOpMode {
         Actions.runBlocking(tab4);
 
         // Get it to run the flywheel and shoot the balls following the motif
-        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooterControl.spinUp())));
-        Actions.runBlocking(new SequentialAction(transfergControl.doTransfer(shootingOrder)));
+        Actions.runBlocking(new SequentialAction(new ParallelAction(tab1,shooter.spinUp())));
+        Actions.runBlocking(new SequentialAction(transfer.doTransfer(shootingOrder)));
 
         // Code to leave the launch zone for extra points at end of auto
         Action tab5 = drive.actionBuilder(new Pose2d(new Vector2d(20,-20),Math.toRadians(-135)))

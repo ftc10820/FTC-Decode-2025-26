@@ -12,9 +12,12 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 // Non-RR imports
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.AutomationsActions;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.camera.ObjectInfo;
 import org.firstinspires.ftc.teamcode.camera.limelight.LimelightCam;
 
@@ -22,16 +25,25 @@ import java.util.Arrays;
 
 @Config
 @Autonomous(name = "RED_GOAL_AUTO", group = "Autonomous")
-public class RedGoalAuto extends TeamLinearOpMode {
+public class RedGoalAuto extends LinearOpMode {
+
+    // TODO: Similar to the OpModes, it would be a good idea to have all initialization/DCMotorExs, Servos, ColorSensors, Camera, etc.
+    // in a single class. I strongly recommend creating an abstract class that extends LinearOpMode which will be the parent class
+    // of your autonomous OpModes.
     @Override
     public void runOpMode() {
         // instantiate your MecanumDrive at a particular pose.
-        initialize();
         Pose2d initialPose = new Pose2d(53, -53, Math.toRadians(135));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
         AutomationsActions actions = new AutomationsActions();
+
+
+
+        LimelightCam cam = new LimelightCam(hardwareMap.get(Limelight3A.class,"limelight"), 316.9,  41.91, 9);
 
         AutomationsActions.Shooter shooter = actions.new Shooter(hardwareMap);
         AutomationsActions.HuskyLensServo hlServo = actions.new HuskyLensServo(hardwareMap);
+        AutomationsActions.CamControl camControl = actions.new CamControl(cam, drive, "red");
         AutomationsActions.Transfer transfer = actions.new Transfer(hardwareMap, drive);
         AutomationsActions.Intake intake = actions.new Intake(hardwareMap);
 
@@ -59,7 +71,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
         ObjectInfo goalTag;
         for (;;){
             try {
-                goalTag = camControl.Cam.scanTag().get(0);
+                goalTag = cam.scanTag().get(0);
                 break;
             } catch (Exception e){
                 e.printStackTrace();
@@ -77,7 +89,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
 
         for (;;){
             try {
-                goalTag = camControl.Cam.scanTag().get(0);
+                goalTag = cam.scanTag().get(0);
                 break;
             } catch (Exception e){
                 e.printStackTrace();
@@ -108,7 +120,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
         Actions.runBlocking(tab4);
         for (;;){
             try {
-                goalTag = camControl.Cam.scanTag().get(0);
+                goalTag = cam.scanTag().get(0);
                 break;
             } catch (Exception e){
                 e.printStackTrace();
@@ -127,7 +139,7 @@ public class RedGoalAuto extends TeamLinearOpMode {
 
         for (;;){
             try {
-                goalTag = camControl.Cam.scanTag().get(0);
+                goalTag = cam.scanTag().get(0);
                 break;
             } catch (Exception e){
                 e.printStackTrace();
